@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import checker.CheckerConstants;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import fileio.GameInput;
 import fileio.Input;
+import game.Game;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +71,11 @@ public final class Main {
                 Input.class);
 
         ArrayNode output = objectMapper.createArrayNode();
+        for (GameInput game : inputData.getGames()) {
+            Game newGame = new Game(game.getStartGame(), inputData.getPlayerOneDecks(),inputData.getPlayerTwoDecks());
+            newGame.startGame(game.getActions(), output);
+        }
+
 
         /*
          * TODO Implement your function here
@@ -75,7 +83,7 @@ public final class Main {
          * How to add output to the output array?
          * There are multiple ways to do this, here is one example:
          *
-         * ObjectMapper mapper = new ObjectMapper();
+         *ObjectMapper mapper = new ObjectMapper();
          *
          * ObjectNode objectNode = mapper.createObjectNode();
          * objectNode.put("field_name", "field_value");
