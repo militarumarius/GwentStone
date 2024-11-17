@@ -9,7 +9,8 @@ public class CursedOne extends Minion{
     public CursedOne(Minion minion) {
         super(minion);
     }
-    public void shapeshift(Minion enemy){
+    @Override
+    public void specialAbility(Minion enemy){
         if(enemy.getAttackDamage() == 0)
             enemy.setHealth(0);
         else{

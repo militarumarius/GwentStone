@@ -9,7 +9,8 @@ public class Miraj extends Minion {
     public Miraj(Minion minion) {
         super(minion);
     }
-    public void Skyjack(Minion enemy) {
+    @Override
+    public void specialAbility(Minion enemy) {
         int auxHealth = enemy.getHealth();;
         this.setHealth(enemy.getHealth());
         enemy.setHealth(auxHealth);

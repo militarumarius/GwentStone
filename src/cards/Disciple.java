@@ -10,7 +10,8 @@ public class Disciple extends Minion{
     public Disciple (Minion minion) {
         super(minion);
     }
-    public void godsPlan(Minion ally) {
+    @Override
+    public void specialAbility(Minion ally) {
         ally.setHealth(ally.getHealth() + 2);
     }
 }

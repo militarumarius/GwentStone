@@ -32,207 +32,237 @@ public class Game {
         this.nextMana = nextMana;
     }
 
-    public Game (StartGameInput input, DecksInput deckPlayer1, DecksInput deckPlayer2) {
+    public Game(StartGameInput input, DecksInput deckPlayer1, DecksInput deckPlayer2) {
         int deckIndexPlayerOne = input.getPlayerOneDeckIdx();
         Deck deckPlayerOne = new Deck(deckPlayer1.getDecks().get(deckIndexPlayerOne));
         int deckIndexPlayerTwo = input.getPlayerTwoDeckIdx();
         Deck deckPlayerTwo = new Deck(deckPlayer2.getDecks().get(deckIndexPlayerTwo));
-        this.player1 = new Player(deckPlayerOne,input.getPlayerOneHero(), ONE);
-        this.player2 = new Player(deckPlayerTwo,input.getPlayerTwoHero(), TWO);
+        this.player1 = new Player(deckPlayerOne, input.getPlayerOneHero(), ONE, 2, 3);
+        this.player2 = new Player(deckPlayerTwo, input.getPlayerTwoHero(), TWO,0,1);
         this.nextMana = 0;
         this.seed = input.getShuffleSeed();
         this.table = new Table();
         this.whoStartTheGame = input.getStartingPlayer();
-        if(whoStartTheGame == ONE)
+        if (whoStartTheGame == ONE)
             player1.setIsPlayerTurn(true);
         else
             player2.setIsPlayerTurn(false);
-        Collections.shuffle(this.player1.getDeck().getCards(),new Random(this.seed));
+        Collections.shuffle(this.player1.getDeck().getCards(), new Random(this.seed));
         Collections.shuffle(this.player2.getDeck().getCards(), new Random(this.seed));
     }
 
 
-    public void startGame(ArrayList <ActionsInput> actions, ArrayNode output){
+    public void startGame(ArrayList<ActionsInput> actions, ArrayNode output) {
         this.newRound();
-        for (ActionsInput action : actions){
-            if(action.getCommand().equals("getPlayerDeck")){
+        for (ActionsInput action : actions) {
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode objectNode = mapper.createObjectNode();
+            if (action.getCommand().equals("getPlayerDeck")) {
                 int player = action.getPlayerIdx();
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
                 objectNode.put("command", "getPlayerDeck");
                 objectNode.put("playerIdx", player);
-                if(player == ONE) {
-                    Deck deck1 = new Deck(player1.getDeck());
-                    objectNode.putPOJO("output", deck1.getCards());
-                    output.addPOJO(objectNode);
-                }
-                else {
-                    Deck deck2 = new Deck(player2.getDeck());
-                    objectNode.putPOJO("output", deck2.getCards());
-                    output.addPOJO(objectNode);
-                }
-
-            }
-            if(action.getCommand().equals("getPlayerHero")){
-                int player = action.getPlayerIdx();
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
-                objectNode.put("command", "getPlayerHero");
-                objectNode.put("playerIdx", player);
-                if(player == ONE)
-                    objectNode.putPOJO("output", player1.getHero());
-                else
-                    objectNode.putPOJO("output", player2.getHero());
+                Deck deck = new Deck(getPlayer(player).getDeck());
+                objectNode.putPOJO("output", deck.getCards());
                 output.addPOJO(objectNode);
             }
-            if(action.getCommand().equals("getPlayerTurn")){
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
+            if (action.getCommand().equals("getPlayerHero")) {
+                int player = action.getPlayerIdx();
+                objectNode.put("command", "getPlayerHero");
+                objectNode.put("playerIdx", player);
+                objectNode.putPOJO("output", getPlayer(player).getHero());
+                output.addPOJO(objectNode);
+            }
+            if (action.getCommand().equals("getPlayerTurn")) {
                 objectNode.put("command", "getPlayerTurn");
-                if(player1.getIsPlayerTurn())
+                if (player1.getIsPlayerTurn())
                     objectNode.put("output", ONE);
                 else
                     objectNode.put("output", TWO);
                 output.addPOJO(objectNode);
             }
-            if(action.getCommand().equals("endPlayerTurn")){
-                if(player1.getIsPlayerTurn()) {
+            if (action.getCommand().equals("endPlayerTurn")) {
+                if (player1.getIsPlayerTurn()) {
                     player1.setIsPlayerTurn(false);
                     player2.setIsPlayerTurn(true);
                 } else {
                     player1.setIsPlayerTurn(true);
                     player2.setIsPlayerTurn(false);
                 }
-                this.numberTurns ++;
-                if(this.numberTurns == 2) {
+                this.numberTurns++;
+                if (this.numberTurns == 2) {
                     this.newRound();
                     numberTurns = 0;
                 }
             }
-            if(action.getCommand().equals("getCardsInHand")){
+            if (action.getCommand().equals("getCardsInHand")) {
                 int player = action.getPlayerIdx();
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
                 objectNode.put("command", "getCardsInHand");
                 objectNode.put("playerIdx", player);
-                if (player == ONE) {
-                    ArrayList<Minion> copyHand = getCopyHand(player1);
-                    objectNode.putPOJO("output", copyHand);
-                } else {
-                    ArrayList<Minion> copyHand = getCopyHand(player2);
-                    objectNode.putPOJO("output", copyHand);
-                }
+                ArrayList<Minion> copyHand = getPlayer(player).getCopyHand();
+                objectNode.putPOJO("output", copyHand);
                 output.addPOJO(objectNode);
             }
-            if(action.getCommand().equals("getPlayerMana")){
+            if (action.getCommand().equals("getPlayerMana")) {
                 int player = action.getPlayerIdx();
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
                 objectNode.put("command", "getPlayerMana");
                 objectNode.put("playerIdx", player);
-                if (player == ONE) {
-                    objectNode.putPOJO("output", player1.getMana());
-                } else {
-                    objectNode.putPOJO("output", player2.getMana());
-                }
+                objectNode.putPOJO("output", getPlayer(player).getMana());
                 output.addPOJO(objectNode);
             }
-            if(action.getCommand().equals("placeCard")){
+            if (action.getCommand().equals("placeCard")) {
                 int handIdx = action.getHandIdx();
-                if(player1.getIsPlayerTurn())
-                    this.placeCard(player1, handIdx, output,2,3);
+                if (player1.getIsPlayerTurn())
+                    table.placeCard(player1, handIdx, output, 2, 3);
                 else
-                    this.placeCard(player2, handIdx, output,1,0);
+                    table.placeCard(player2, handIdx, output, 1, 0);
             }
-            if(action.getCommand().equals("getCardsOnTable")){
+            if (action.getCommand().equals("getCardsOnTable")) {
                 Table copyTable = new Table(table);
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
                 objectNode.put("command", "getCardsOnTable");
                 objectNode.putPOJO("output", copyTable.getCardsOnTable());
                 output.addPOJO(objectNode);
             }
-        }
-    }
-
-
-    private ArrayList<Minion> getCopyHand(Player player) {
-        ArrayList<Minion> copyHand = new ArrayList<>(player.getHand().size());
-        for(Minion card : player.getHand()){
-            switch (card.getName()) {
-                case "The Ripper" -> {
-                    Ripper ripper = new Ripper(card);
-                    copyHand.add(ripper);
-                }
-                case "Miraj" -> {
-                    Miraj miraj = new Miraj(card);
-                    copyHand.add(miraj);
-                }
-                case "The Cursed One" -> {
-                    CursedOne cursedOne = new CursedOne(card);
-                    copyHand.add(cursedOne);
-                }
-                case "Disciple" -> {
-                    Disciple disciple = new Disciple(card);
-                    copyHand.add(disciple);
-                }
-                default -> {
-                    Minion minion = new Minion(card);
-                    copyHand.add(minion);
+            if (action.getCommand().equals("cardUsesAttack")) {
+                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
+                Coordinates attacked = new Coordinates(action.getCardAttacked().getX(), action.getCardAttacked().getY());
+                if ((attacked.y + 1 <= table.getCardsOnTable().get(attacked.x).size())) {
+                    int x1 = 2;
+                    if (player2.getIsPlayerTurn())
+                        x1 = 0;
+                    if (attacked.x == x1 || attacked.x == x1 + 1) {
+                        objectNode.put("command", "cardUsesAttack");
+                        objectNode.putPOJO("cardAttacker", attacker);
+                        objectNode.putPOJO("cardAttacked", attacked);
+                        objectNode.put("error", "Attacked card does not belong to the enemy.");
+                        output.addPOJO(objectNode);
+                    } else
+                        this.attackCard(attacker, attacked, output);
                 }
             }
-        }
-        return copyHand;
-    }
+            if (action.getCommand().equals("getCardAtPosition")) {
+                this.getCardPosition(action, output);
+            }
+            if (action.getCommand().equals("cardUsesAbility")) {
+                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
+                Coordinates attacked = new Coordinates(action.getCardAttacked().getX(), action.getCardAttacked().getY());
+                if ((attacked.y + 1 <= table.getCardsOnTable().get(attacked.x).size())) {
+//                    int x1 = 2;
+//                    if (player2.getIsPlayerTurn())
+//                        x1 = 0;
+//                    if (attacked.x == x1 || attacked.x == x1 + 1) {
+//                        objectNode.put("command", "cardUsesAttack");
+//                        objectNode.putPOJO("cardAttacker", attacker);
+//                        objectNode.putPOJO("cardAttacked", attacked);
+//                        objectNode.put("error", "Attacked card does not belong to the enemy.");
+//                        output.addPOJO(objectNode);
+//                    } else
+                        this.useAbilityCard(attacker, attacked, output);
+                }
 
-    public void placeCard(Player player, int handIdx, ArrayNode output, int x,int y) {
-        if (player.getHand().size() >= handIdx + 1) {
-            if (player.getMana() < player.getHand().get(handIdx).getMana()) {
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
-                objectNode.put("command", "placeCard");
-                objectNode.put("handIdx", handIdx);
-                objectNode.put("error", "Not enough mana to place card on table.");
-                output.addPOJO(objectNode);
-            } else if (player.getHand().get(handIdx).getIsTank() && table.getCardsOnTable().get(x).size() == 5) {
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
-                objectNode.put("command", "placeCard");
-                objectNode.put("handIdx", handIdx);
-                objectNode.put("error", "Cannot place card on table since row is full.");
-                output.addPOJO(objectNode);
-            } else if (!player.getHand().get(handIdx).getIsTank() && table.getCardsOnTable().get(y).size() == 5) {
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectNode objectNode = mapper.createObjectNode();
-                objectNode.put("command", "placeCard");
-                objectNode.put("handIdx", handIdx);
-                objectNode.put("error", "Cannot place card on table since row is full.");
-                output.addPOJO(objectNode);
-            }  else if(player.getNumber() == ONE) {
-                table.addCard(player.getHand().get(handIdx), ONE);
-                player.setMana(player.getMana() - player.getHand().get(handIdx).getMana());
-                player.getHand().remove(handIdx);
-            } else {
-                table.addCard(player.getHand().get(handIdx), TWO);
-                player.setMana(player.getMana() - player.getHand().get(handIdx).getMana());
-                player.getHand().remove(handIdx);
             }
         }
     }
 
-    public void newRound() {
-        if(!(player1.getDeck().getCards().isEmpty())) {
-            player1.getHand().add(player1.getDeck().getCards().get(0));
-            player1.getDeck().getCards().remove(0);
+    public void getCardPosition(ActionsInput action, ArrayNode output) {
+        Coordinates cardPosition = new Coordinates(action.getX(), action.getY());
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", "getCardAtPosition");
+        objectNode.put("x", cardPosition.x);
+        objectNode.put("y", cardPosition.y);
+        if (cardPosition.y + 1 > table.getCardsOnTable().get(cardPosition.x).size()) {
+            objectNode.put("output", "No card available at that position.");
+        } else {
+            objectNode.putPOJO("output", table.getCardsOnTable().get(cardPosition.x).get(cardPosition.y));
         }
-        if(!(player2.getDeck().getCards().isEmpty())){
-            player2.getHand().add(player2.getDeck().getCards().get(0));
-            player2.getDeck().getCards().remove(0);
-        }
-        if(getNextMana() <= MAX_MANA)
-            setNextMana(getNextMana() + 1);
-        player1.setMana(player1.getMana() + getNextMana());
-        player2.setMana(player2.getMana() + getNextMana());
+        output.addPOJO(objectNode);
+
     }
+
+
+public void attackCard(Coordinates attacker, Coordinates attacked, ArrayNode output) {
+    String error = "";
+    Minion cardAttacked = table.getCardsOnTable().get(attacked.x).get(attacked.y);
+    Minion cardAttacker = table.getCardsOnTable().get(attacker.x).get(attacker.y);
+    if (cardAttacker.getIsHasAttacked()) {
+        error = "Attacker card has already attacked this turn.";
+    } else if (cardAttacker.getIsFrozen()) {
+        error = "Attacker card is frozen.";
+    } else if (!cardAttacked.getIsTank() && (player1.getIsPlayerTurn() && (table.checkTank(2))
+            || (player2.getIsPlayerTurn() && table.checkTank(1)))) {
+        error = "Attacked card is not of type 'Tank'.";
+    } else {
+        cardAttacker.setHasAttacked(true);
+        if (cardAttacked.getHealth() <= cardAttacker.getAttackDamage()) {
+            table.getCardsOnTable().get(attacked.x).remove(attacked.y);
+        } else
+            cardAttacked.setHealth(cardAttacked.getHealth() - cardAttacker.getAttackDamage());
+        return;
+    }
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode objectNode = mapper.createObjectNode();
+    objectNode.put("command", "cardUsesAttack");
+    objectNode.putPOJO("cardAttacker", attacker);
+    objectNode.putPOJO("cardAttacked", attacked);
+    objectNode.put("error", error);
+    output.addPOJO(objectNode);
+
+}
+public void useAbilityCard(Coordinates attacker, Coordinates attacked, ArrayNode output){
+    String error = "";
+    Minion cardAttacked = table.getCardsOnTable().get(attacked.x).get(attacked.y);
+    Minion cardAttacker = table.getCardsOnTable().get(attacker.x).get(attacker.y);
+    if (cardAttacker.getIsFrozen()) {
+        error = "Attacker card is frozen.";
+    } else if (cardAttacker.getIsHasAttacked()) {
+        error = "Attacker card has already attacked this turn.";
+    } else if (!cardAttacked.getIsTank() && (player1.getIsPlayerTurn() && (table.checkTank(2))
+            || (player2.getIsPlayerTurn() && table.checkTank(1)))) {
+        error = "Attacked card is not of type 'Tank'.";
+    } else {
+        cardAttacker.setHasAttacked(true);
+        if (cardAttacked.getHealth() <= cardAttacker.getAttackDamage()) {
+            table.getCardsOnTable().get(attacked.x).remove(attacked.y);
+        } else
+            cardAttacked.setHealth(cardAttacked.getHealth() - cardAttacker.getAttackDamage());
+        return;
+    }
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode objectNode = mapper.createObjectNode();
+    objectNode.put("command", "cardUsesAttack");
+    objectNode.putPOJO("cardAttacker", attacker);
+    objectNode.putPOJO("cardAttacked", attacked);
+    objectNode.put("error", error);
+    output.addPOJO(objectNode);
+
+}
+
+public void newRound() {
+    if (!(player1.getDeck().getCards().isEmpty())) {
+        player1.getHand().add(player1.getDeck().getCards().get(0));
+        player1.getDeck().getCards().remove(0);
+    }
+    if (!(player2.getDeck().getCards().isEmpty())) {
+        player2.getHand().add(player2.getDeck().getCards().get(0));
+        player2.getDeck().getCards().remove(0);
+    }
+    if (getNextMana() <= MAX_MANA)
+        setNextMana(getNextMana() + 1);
+    player1.setMana(player1.getMana() + getNextMana());
+    player2.setMana(player2.getMana() + getNextMana());
+    table.unattackCards();
+    table.unfreezeCards();
+}
+
+public Player getPlayer(final int idx) {
+    if (idx == ONE)
+        return player1;
+    return player2;
+}
+public Player getCurrentPlayer(){
+        if(player1.getIsPlayerTurn())
+            return player1;
+        return player2;
+}
 
 }

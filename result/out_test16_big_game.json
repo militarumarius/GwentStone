@@ -13,15 +13,74 @@
   "command" : "getPlayerTurn",
   "output" : 1
 }, {
+  "command" : "getCardAtPosition",
+  "x" : 0,
+  "y" : 0,
+  "output" : {
+    "mana" : 2,
+    "health" : 2,
+    "description" : "Standard card: A drink can always be served, with the blood of his enemies.",
+    "colors" : [ "Red", "Blue", "Pink" ],
+    "name" : "Berserker",
+    "attackDamage" : 2
+  }
+}, {
   "command" : "getPlayerTurn",
   "output" : 2
+}, {
+  "command" : "getCardAtPosition",
+  "x" : 2,
+  "y" : 0,
+  "output" : {
+    "mana" : 3,
+    "health" : 1,
+    "description" : "Premium card: Ravished by the winds of hell, no soul is to be forgiven.",
+    "colors" : [ "Orange", "Red", "Black" ],
+    "name" : "The Ripper",
+    "attackDamage" : 6
+  }
+}, {
+  "command" : "getCardAtPosition",
+  "x" : 2,
+  "y" : 0,
+  "output" : {
+    "mana" : 3,
+    "health" : 1,
+    "description" : "Premium card: Ravished by the winds of hell, no soul is to be forgiven.",
+    "colors" : [ "Orange", "Red", "Black" ],
+    "name" : "The Ripper",
+    "attackDamage" : 6
+  }
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 1,
   "output" : 0
 }, {
+  "command" : "getCardAtPosition",
+  "x" : 0,
+  "y" : 0,
+  "output" : {
+    "mana" : 2,
+    "health" : 2,
+    "description" : "Standard card: A drink can always be served, with the blood of his enemies.",
+    "colors" : [ "Red", "Blue", "Pink" ],
+    "name" : "Berserker",
+    "attackDamage" : 2
+  }
+}, {
   "command" : "getPlayerTurn",
   "output" : 2
+}, {
+  "command" : "cardUsesAttack",
+  "cardAttacker" : {
+    "x" : 2,
+    "y" : 0
+  },
+  "cardAttacked" : {
+    "x" : 0,
+    "y" : 2
+  },
+  "error" : "Attacked card is not of type 'Tank'."
 }, {
   "command" : "getPlayerTurn",
   "output" : 1
@@ -30,9 +89,32 @@
   "playerIdx" : 1,
   "output" : 3
 }, {
+  "command" : "getCardAtPosition",
+  "x" : 0,
+  "y" : 0,
+  "output" : {
+    "mana" : 2,
+    "health" : 2,
+    "description" : "Standard card: A drink can always be served, with the blood of his enemies.",
+    "colors" : [ "Red", "Blue", "Pink" ],
+    "name" : "Berserker",
+    "attackDamage" : 2
+  }
+}, {
   "command" : "getPlayerMana",
   "playerIdx" : 2,
   "output" : 7
+}, {
+  "command" : "cardUsesAttack",
+  "cardAttacker" : {
+    "x" : 2,
+    "y" : 3
+  },
+  "cardAttacked" : {
+    "x" : 0,
+    "y" : 1
+  },
+  "error" : "Attacked card is not of type 'Tank'."
 }, {
   "command" : "getCardsOnTable",
   "output" : [ [ {
@@ -65,14 +147,14 @@
     "attackDamage" : 5
   } ], [ {
     "mana" : 3,
-    "health" : 3,
+    "health" : 1,
     "description" : "Premium card: Ravished by the winds of hell, no soul is to be forgiven.",
     "colors" : [ "Orange", "Red", "Black" ],
     "name" : "The Ripper",
     "attackDamage" : 6
   }, {
     "mana" : 3,
-    "health" : 6,
+    "health" : 2,
     "description" : "Premium card: You shall not pass, you shall not prevail, you shall perish.",
     "colors" : [ "Brown", "Blue" ],
     "name" : "Warden",

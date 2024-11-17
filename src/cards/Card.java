@@ -1,5 +1,6 @@
 package cards;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import fileio.CardInput;
 
 import java.util.ArrayList;
@@ -11,6 +12,16 @@ public class Card {
     private String description;
     private ArrayList<String> colors;
     private String name;
+    @JsonIgnore
+    private boolean hasAttacked;
+    @JsonIgnore
+    public boolean getIsHasAttacked() {
+        return hasAttacked;
+    }
+
+    public void setHasAttacked(boolean hasAttacked) {
+        this.hasAttacked = hasAttacked;
+    }
 
     public int getMana() {
 
@@ -65,6 +76,7 @@ public class Card {
         this.description = card.getDescription();
         this.colors = card.getColors();
         this.name = card.getName();
+//        this.hasAttacked = false;
     }
 
     public Card (Card card) {
@@ -72,8 +84,9 @@ public class Card {
         this.description = card.getDescription();
         this.colors = new ArrayList<String>(card.getColors());
         this.name = card.getName();
+        this.hasAttacked = card.hasAttacked;
     }
 
-
+    public void specialAbility(Minion enemy){}
 
 }

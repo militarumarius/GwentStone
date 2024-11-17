@@ -9,7 +9,9 @@ public class Ripper extends Minion{
     public Ripper (Minion minion) {
         super(minion);
     }
-    public void weakKnees(Minion enemy){
+
+    @Override
+    public void specialAbility(Minion enemy){
         int attack = enemy.getAttackDamage();
         if(attack < 2)
             enemy.setAttackDamage(0);

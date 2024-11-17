@@ -1,6 +1,7 @@
 package game;
 
 import cards.*;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import fileio.CardInput;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ public class Player {
     private ArrayList<Minion> hand;
     private boolean isPlayerTurn;
     private int mana;
+    private int x;
+    private int y;
 
     public Hero getHero() {
         return hero;
@@ -66,11 +69,13 @@ public class Player {
         this.isPlayerTurn = isPlayerTurn;
     }
 
-    public Player(Deck deckPlayer, CardInput hero, int number) {
+    public Player(Deck deckPlayer, CardInput hero, int number, int x, int y) {
         this.deck = deckPlayer;
         this.number = number;
         this.hand = new ArrayList<>();
         this.isPlayerTurn = false;
+        this.x = x;
+        this.y = y;
         if(hero.getName().equals("Lord Royce")){
             this.hero = new LordRoyce(hero);
         } else if(hero.getName().equals("King Mudface") ){
@@ -81,5 +86,35 @@ public class Player {
             this.hero = new EmpressThorina(hero);
         }
     }
+
+    public ArrayList<Minion> getCopyHand() {
+        ArrayList<Minion> copyHand = new ArrayList<>(this.getHand().size());
+        for(Minion card : this.getHand()){
+            switch (card.getName()) {
+                case "The Ripper" -> {
+                    Ripper ripper = new Ripper(card);
+                    copyHand.add(ripper);
+                }
+                case "Miraj" -> {
+                    Miraj miraj = new Miraj(card);
+                    copyHand.add(miraj);
+                }
+                case "The Cursed One" -> {
+                    CursedOne cursedOne = new CursedOne(card);
+                    copyHand.add(cursedOne);
+                }
+                case "Disciple" -> {
+                    Disciple disciple = new Disciple(card);
+                    copyHand.add(disciple);
+                }
+                default -> {
+                    Minion minion = new Minion(card);
+                    copyHand.add(minion);
+                }
+            }
+        }
+        return copyHand;
+    }
+
 
 }

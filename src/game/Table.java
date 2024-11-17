@@ -3,6 +3,7 @@ package game;
 import cards.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
@@ -79,5 +80,50 @@ public class Table {
             }
         }
         return copyRow;
+    }
+    public boolean checkTank(int row) {
+        for(Minion minion : cardsOnTable.get(row)){
+            if(minion.getIsTank())
+                return true;
+        }
+        return false;
+    }
+    public void unattackCards(){
+        for (int i = 0; i < ROWS; i++) {
+            for(Minion minion : cardsOnTable.get(i)){
+                minion.setHasAttacked(false);
+            }
+        }
+    }
+    public void unfreezeCards(){
+        for (int i = 0; i < ROWS; i++) {
+            for(Minion minion : cardsOnTable.get(i)){
+                minion.setIsFrozen(false);
+            }
+        }
+    }
+    public void placeCard(Player player, int handIdx, ArrayNode output, int x, int y) {
+        if (player.getHand().size() < handIdx + 1)
+            return;
+
+        String error = "";
+        if (player.getMana() < player.getHand().get(handIdx).getMana()) {
+            error = "Not enough mana to place card on table.";
+        } else if (player.getHand().get(handIdx).getIsTank() && this.getCardsOnTable().get(x).size() == 5) {
+            error = "Cannot place card on table since row is full.";
+        } else if (!player.getHand().get(handIdx).getIsTank() && this.getCardsOnTable().get(y).size() == 5) {
+            error = "Cannot place card on table since row is full.";
+        } else {
+            this.addCard(player.getHand().get(handIdx), player.getNumber());
+            player.setMana(player.getMana() - player.getHand().get(handIdx).getMana());
+            player.getHand().remove(handIdx);
+            return;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", "placeCard");
+        objectNode.put("handIdx", handIdx);
+        objectNode.put("error", error);
+        output.addPOJO(objectNode);
     }
 }
