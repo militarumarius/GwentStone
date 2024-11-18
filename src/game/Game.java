@@ -69,7 +69,8 @@ public class Game {
                 int player = action.getPlayerIdx();
                 objectNode.put("command", "getPlayerHero");
                 objectNode.put("playerIdx", player);
-                objectNode.putPOJO("output", getPlayer(player).getHero());
+                Hero copy = new Hero(getPlayer(player).getHero());
+                objectNode.putPOJO("output", copy);
                 output.addPOJO(objectNode);
             }
             if (action.getCommand().equals("getPlayerTurn")) {
@@ -84,9 +85,12 @@ public class Game {
                 if (player1.getIsPlayerTurn()) {
                     player1.setIsPlayerTurn(false);
                     player2.setIsPlayerTurn(true);
+                    table.unfreezeCards(player1.getX(), player1.getY());
                 } else {
                     player1.setIsPlayerTurn(true);
                     player2.setIsPlayerTurn(false);
+                    table.unfreezeCards(player2.getX(), player2.getY());
+
                 }
                 this.numberTurns++;
                 if (this.numberTurns == 2) {
@@ -148,7 +152,20 @@ public class Game {
                 if ((attacked.y + 1 <= table.getCardsOnTable().get(attacked.x).size())) {
                         this.useAbilityCard(attacker, attacked, output);
                 }
-
+            }
+            if (action.getCommand().equals("useAttackHero")){
+                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
+                    this.attackHero(attacker, output);
+            }
+            if (action.getCommand().equals("useHeroAbility")){
+                int row = action.getAffectedRow();
+                getCurrentPlayer().specialAttackHero(table.getCardsOnTable().get(row),row,output);
+            }
+            if (action.getCommand().equals("getFrozenCardsOnTable")) {
+                ArrayList<Minion> frozen = table.getFrozenCards();
+                objectNode.put("command", "getFrozenCardsOnTable");
+                objectNode.putPOJO("output", frozen);
+                output.addPOJO(objectNode);
             }
         }
     }
@@ -171,6 +188,36 @@ public class Game {
 
     }
 
+public void attackHero(Coordinates attacker, ArrayNode output) {
+    String error = "";
+    Minion cardAttacker = table.getCardsOnTable().get(attacker.x).get(attacker.y);
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode objectNode = mapper.createObjectNode();
+    if (cardAttacker.getIsFrozen()) {
+        error = "Attacker card is frozen.";
+    } else if (cardAttacker.getIsHasAttacked()) {
+        error = "Attacker card has already attacked this turn.";
+    } else if (table.checkTank(getOpponent().getX())) {
+        error = "Attacked card is not of type 'Tank'.";
+    } else {
+        Hero hero = getOpponent().getHero();
+        cardAttacker.setHasAttacked(true);
+        hero.setHealth(hero.getHealth() - cardAttacker.getAttackDamage());
+        if(getOpponent().getHero().getHealth() <= 0 && getCurrentPlayer().getNumber() == ONE){
+            objectNode.put("gameEnded", "Player one killed the enemy hero.");
+            output.addPOJO(objectNode);
+        } else if(getOpponent().getHero().getHealth() <= 0 && getCurrentPlayer().getNumber() == TWO){
+            objectNode.put("gameEnded", "Player two killed the enemy hero.");
+            output.addPOJO(objectNode);
+        }
+        return;
+    }
+    objectNode.put("command", "useAttackHero");
+    objectNode.putPOJO("cardAttacker", attacker);
+    objectNode.put("error", error);
+    output.addPOJO(objectNode);
+
+}
 
 public void attackCard(Coordinates attacker, Coordinates attacked, ArrayNode output) {
     String error = "";
@@ -254,7 +301,10 @@ public void newRound() {
     player1.setMana(player1.getMana() + getNextMana());
     player2.setMana(player2.getMana() + getNextMana());
     table.unattackCards();
-    table.unfreezeCards();
+    player1.getHero().setHasAttacked(false);
+    player2.getHero().setHasAttacked(false);
+
+
 }
 
 public Player getPlayer(final int idx) {
@@ -262,11 +312,13 @@ public Player getPlayer(final int idx) {
         return player1;
     return player2;
 }
+
 public Player getCurrentPlayer(){
         if(player1.getIsPlayerTurn())
             return player1;
         return player2;
 }
+
     public Player getOpponent(){
         if(player1.getIsPlayerTurn())
             return player2;

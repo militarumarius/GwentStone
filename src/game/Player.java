@@ -1,7 +1,10 @@
 package game;
 
 import cards.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.CardInput;
 
 import java.util.ArrayList;
@@ -96,7 +99,7 @@ public class Player {
             this.hero = new LordRoyce(hero);
         } else if(hero.getName().equals("King Mudface") ){
             this.hero = new KingMudface(hero);
-        } else if(hero.getName().equals("GeneralKociraw")){
+        } else if(hero.getName().equals("General Kocioraw")){
             this.hero = new GeneralKocioraw(hero);
         } else if(hero.getName().equals("Empress Thorina")){
             this.hero = new EmpressThorina(hero);
@@ -130,6 +133,41 @@ public class Player {
             }
         }
         return copyHand;
+    }
+    public void specialAttackHero(ArrayList<Minion> rowOnTable, int row, ArrayNode output){
+        String error = "";
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        if(this.mana < this.hero.getMana()){
+            error = "Not enough mana to use hero's ability.";
+        } else if (this.hero.getIsHasAttacked()) {
+            error = "Hero has already attacked this turn.";
+        } else if(this.hero.getName().equals("Lord Royce") || this.hero.getName().equals("Empress Thorina")) {
+            if (row == this.x || row == this.y) {
+                error = "Selected row does not belong to the enemy.";
+            } else {
+                this.mana -= this.hero.getMana();
+                this.hero.setHasAttacked(true);
+                this.hero.specialHeroAbility(rowOnTable);
+                return;
+            }
+        }else{
+            if (row != this.x && row != this.y) {
+                error = "Selected row does not belong to the current player.";
+            } else {
+                this.mana -= this.hero.getMana();
+                this.hero.setHasAttacked(true);
+                this.hero.specialHeroAbility(rowOnTable);
+                return;
+            }
+        }
+        objectNode.put("command", "useHeroAbility");
+        objectNode.put("affectedRow", row);
+        objectNode.put("error", error);
+        output.addPOJO(objectNode);
+
+
+
     }
 
 

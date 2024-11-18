@@ -2,6 +2,8 @@ package cards;
 
 import fileio.CardInput;
 
+import java.util.ArrayList;
+
 public class Hero extends Card{
 
     private static final int MAX_HEALTH = 30;
@@ -24,6 +26,8 @@ public class Hero extends Card{
         super(hero);
         this.health = hero.getHealth();
     }
+    public void specialHeroAbility(ArrayList<Minion> enemy){}
 
-}
+
+    }
 

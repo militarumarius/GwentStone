@@ -56,28 +56,26 @@ public class Table {
     private ArrayList<Minion> getCopyTableRows(ArrayList<Minion> row) {
         ArrayList<Minion> copyRow = new ArrayList<>(row.size());
         for (Minion card : row) {
+            Minion minion;
             switch (card.getName()) {
                 case "The Ripper" -> {
-                    Ripper ripper = new Ripper(card);
-                    copyRow.add(ripper);
+                    minion = new Ripper(card);
                 }
                 case "Miraj" -> {
-                    Miraj miraj = new Miraj(card);
-                    copyRow.add(miraj);
+                    minion = new Miraj(card);
                 }
                 case "The Cursed One" -> {
-                    CursedOne cursedOne = new CursedOne(card);
-                    copyRow.add(cursedOne);
+                    minion = new CursedOne(card);
                 }
                 case "Disciple" -> {
-                    Disciple disciple = new Disciple(card);
-                    copyRow.add(disciple);
+                    minion  = new Disciple(card);
                 }
                 default -> {
-                    Minion minion = new Minion(card);
-                    copyRow.add(minion);
+                    minion = new Minion(card);
                 }
             }
+            copyRow.add(minion);
+
         }
         return copyRow;
     }
@@ -95,8 +93,8 @@ public class Table {
             }
         }
     }
-    public void unfreezeCards(){
-        for (int i = 0; i < ROWS; i++) {
+    public void unfreezeCards(int x, int y){
+        for (int i = x; i <= y; i++) {
             for(Minion minion : cardsOnTable.get(i)){
                 minion.setIsFrozen(false);
             }
@@ -126,4 +124,18 @@ public class Table {
         objectNode.put("error", error);
         output.addPOJO(objectNode);
     }
+
+    public ArrayList<Minion> getFrozenCards() {
+        ArrayList<Minion> frozen = new ArrayList<Minion>();
+        for (int i = 0; i < ROWS; i++) {
+            ArrayList<Minion> rand = this.getCardsOnTable().get(i);
+            if(!rand.isEmpty() && rand.get(0).getIsFrozen())
+                for(Minion minion : rand)
+                    if(minion.getIsFrozen())
+                        frozen.add(minion);
+        }
+        return frozen;
+
+    }
+
 }
