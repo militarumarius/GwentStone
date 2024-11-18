@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import fileio.CardInput;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
-public class Card extends Object {
+public class Card {
 
     private int mana;
     private int health;
@@ -15,63 +14,81 @@ public class Card extends Object {
     private String name;
     @JsonIgnore
     private boolean hasAttacked;
+
+    /**
+     */
     @JsonIgnore
     public boolean getIsHasAttacked() {
         return hasAttacked;
     }
 
-    public void setHasAttacked(boolean hasAttacked) {
+    /**
+     */
+    public void setHasAttacked(final boolean hasAttacked) {
         this.hasAttacked = hasAttacked;
     }
 
+    /**
+     */
     public int getMana() {
-
         return mana;
     }
 
+    /**
+     */
     public int getHealth() {
         return health;
     }
 
-    public void setHealth(int health) {
+    /**
+     */
+    public void setHealth(final int health) {
         this.health = health;
     }
 
+    /**
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     */
     public ArrayList<String> getColors() {
-
         return colors;
     }
 
+    /**
+     */
     public String getName() {
-
         return name;
     }
 
-    public void setMana(int mana) {
-
+    /**
+     */
+    public void setMana(final int mana) {
         this.mana = mana;
     }
 
-    public void setDescription(String description) {
-
+    /**
+     */
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public void setColors(ArrayList<String> colors) {
-
+    /**
+     */
+    public void setColors(final ArrayList<String> colors) {
         this.colors = colors;
     }
 
-    public void setName(String name) {
-
+    /**
+     */
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public Card (CardInput card) {
+    public Card(final CardInput card) {
         this.mana = card.getMana();
         this.health = card.getHealth();
         this.description = card.getDescription();
@@ -79,7 +96,10 @@ public class Card extends Object {
         this.name = card.getName();
     }
 
-    public Card (Card card) {
+    /**
+     * copy constructor
+     */
+    public Card(final Card card) {
         this.mana = card.getMana();
         this.description = card.getDescription();
         this.colors = new ArrayList<String>(card.getColors());
@@ -87,6 +107,11 @@ public class Card extends Object {
         this.hasAttacked = card.hasAttacked;
     }
 
-    public void specialAbility(Minion enemy){}
+    /**
+     * method use for special ability
+     */
+    public void specialAbility(final Minion enemy) {
+
+    }
 
 }

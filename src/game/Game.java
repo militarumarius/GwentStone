@@ -1,6 +1,7 @@
 package game;
 
-import cards.*;
+import cards.Hero;
+import cards.Minion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import fileio.ActionsInput;
@@ -18,32 +19,38 @@ public class Game {
     private Player player1, player2;
     private int seed;
     private int numberTurns;
-    private int MAX_MANA = 10;
+    private int maxMana = 10;
     private int nextMana;
     private Table table;
 
+    /**
+     */
     public int getNextMana() {
         return nextMana;
     }
 
-    public void setNextMana(int nextMana) {
+    /**
+     */
+    public void setNextMana(final int nextMana) {
         this.nextMana = nextMana;
     }
 
-    public Game(StartGameInput input, DecksInput deckPlayer1, DecksInput deckPlayer2) {
+    public Game(final StartGameInput input, final DecksInput deckPlayer1,
+                final DecksInput deckPlayer2) {
         int deckIndexPlayerOne = input.getPlayerOneDeckIdx();
         Deck deckPlayerOne = new Deck(deckPlayer1.getDecks().get(deckIndexPlayerOne));
         int deckIndexPlayerTwo = input.getPlayerTwoDeckIdx();
         Deck deckPlayerTwo = new Deck(deckPlayer2.getDecks().get(deckIndexPlayerTwo));
         this.player1 = new Player(deckPlayerOne, input.getPlayerOneHero(), ONE, 2, 3);
-        this.player2 = new Player(deckPlayerTwo, input.getPlayerTwoHero(), TWO,1,0);
+        this.player2 = new Player(deckPlayerTwo, input.getPlayerTwoHero(), TWO, 1, 0);
         this.seed = input.getShuffleSeed();
-        Collections.shuffle(this.player1.getDeck().getCards(), new Random( this.seed));
-        Collections.shuffle(this.player2.getDeck().getCards(), new Random( this.seed));
+        Collections.shuffle(this.player1.getDeck().getCards(), new Random(this.seed));
+        Collections.shuffle(this.player2.getDeck().getCards(), new Random(this.seed));
         this.nextMana = 0;
         this.table = new Table();
-        if (input.getStartingPlayer() == ONE)
+        if (input.getStartingPlayer() == ONE) {
             player1.setIsPlayerTurn(true);
+        }
         player2.setIsPlayerTurn(false);
         table.unattackCards();
         player1.getHero().setHasAttacked(false);
@@ -51,8 +58,14 @@ public class Game {
 
     }
 
-
-    public void startGame(ArrayList<ActionsInput> actions, int gamesPlayed, ArrayNode output) {
+    /**
+     * method that start the game, and executes the commands received as input
+     * @param actions the actions
+     * @param gamesPlayed number of games played
+     * @param output array node to display the objects
+     */
+    public void startGame(final ArrayList<ActionsInput> actions,
+                          final int gamesPlayed, final ArrayNode output) {
         this.newRound();
         for (ActionsInput action : actions) {
             ObjectMapper mapper = new ObjectMapper();
@@ -65,7 +78,7 @@ public class Game {
 //                objectNode.putPOJO("output", deck.getCards());
 //                output.addPOJO(objectNode);
                 Deck deck = new Deck(getPlayer(player).getDeck());
-                Comands getPlayerDeck = new Comands(player, "getPlayerDeck", deck.getCards());
+                Commands getPlayerDeck = new Commands(player, "getPlayerDeck", deck.getCards());
                 getPlayerDeck.playerOutput(output);
             }
             if (action.getCommand().equals("getPlayerHero")) {
@@ -76,7 +89,7 @@ public class Game {
 //                objectNode.putPOJO("output", copy);
 //                output.addPOJO(objectNode);
                 Hero copy = new Hero(getPlayer(player).getHero());
-                Comands getPlayerHero = new Comands(player, "getPlayerHero", copy);
+                Commands getPlayerHero = new Commands(player, "getPlayerHero", copy);
                 getPlayerHero.playerOutput(output);
             }
             if (action.getCommand().equals("getPlayerTurn")) {
@@ -95,7 +108,7 @@ public class Game {
 //                objectNode.putPOJO("output", copyHand);
 //                output.addPOJO(objectNode);
                 ArrayList<Minion> copyHand = getPlayer(player).getCopyHand();
-                Comands getCardsInHand = new Comands(player, "getCardsInHand", copyHand);
+                Commands getCardsInHand = new Commands(player, "getCardsInHand", copyHand);
                 getCardsInHand.playerOutput(output);
 
             }
@@ -105,87 +118,102 @@ public class Game {
 //                objectNode.put("playerIdx", player);
 //                objectNode.putPOJO("output", getPlayer(player).getMana());
 //                output.addPOJO(objectNode);
-                Comands getPlayerMana = new Comands(player, "getPlayerMana", getPlayer(player).getMana());
+                Commands getPlayerMana = new Commands(player, "getPlayerMana",
+                        getPlayer(player).getMana());
                 getPlayerMana.playerOutput(output);
             }
             if (action.getCommand().equals("placeCard")) {
                 int handIdx = action.getHandIdx();
                 int firstRow = getCurrentPlayer().getFirstRow();
                 int secondRow = getCurrentPlayer().getSecondRow();
-                table.placeCardOnTable(getCurrentPlayer(), handIdx, output, firstRow , secondRow);
+                table.placeCardOnTable(getCurrentPlayer(), handIdx, output, firstRow, secondRow);
             }
             if (action.getCommand().equals("getCardsOnTable")) {
                 Table copyTable = new Table(table);
 //                objectNode.put("command", "getCardsOnTable");
 //                objectNode.putPOJO("output", copyTable.getCardsOnTable());
 //                output.addPOJO(objectNode);
-                Comands getCardsOnTable = new Comands("getCardsOnTable", copyTable.getCardsOnTable());
+                Commands getCardsOnTable = new Commands("getCardsOnTable",
+                        copyTable.getCardsOnTable());
                 getCardsOnTable.easyCommand(output);
             }
             if (action.getCommand().equals("cardUsesAttack")) {
-                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
-                Coordinates attacked = new Coordinates(action.getCardAttacked().getX(), action.getCardAttacked().getY());
-                if ((attacked.y + 1 <= table.getCardsOnTable().get(attacked.x).size())) {
-                    table.attackCard(attacker, attacked, getCurrentPlayer(), getOpponent(), output);
+                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(),
+                        action.getCardAttacker().getY());
+                Coordinates attacked = new Coordinates(action.getCardAttacked().getX(),
+                        action.getCardAttacked().getY());
+                if ((attacked.getY() + 1 <= table.getCardsOnTable().get(attacked.getX()).size())) {
+                    table.attackCard(attacker, attacked, getCurrentPlayer(),
+                            getOpponent(), output);
                 }
             }
             if (action.getCommand().equals("getCardAtPosition")) {
                 table.getCardPosition(action, output);
             }
             if (action.getCommand().equals("cardUsesAbility")) {
-                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
-                Coordinates attacked = new Coordinates(action.getCardAttacked().getX(), action.getCardAttacked().getY());
-                if ((attacked.y + 1 <= table.getCardsOnTable().get(attacked.x).size())) {
+                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(),
+                        action.getCardAttacker().getY());
+                Coordinates attacked = new Coordinates(action.getCardAttacked().getX(),
+                        action.getCardAttacked().getY());
+                if ((attacked.getY() + 1 <= table.getCardsOnTable().get(attacked.getX()).size())) {
                         table.useAbilityCard(attacker, attacked, getOpponent(), output);
                 }
             }
-            if (action.getCommand().equals("useAttackHero")){
-                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
-                    table.attackHero(attacker,getOpponent(), getCurrentPlayer(), output);
+            if (action.getCommand().equals("useAttackHero")) {
+                Coordinates attacker = new Coordinates(action.getCardAttacker().getX(),
+                        action.getCardAttacker().getY());
+                    table.attackHero(attacker, getOpponent(), getCurrentPlayer(), output);
             }
-            if (action.getCommand().equals("useHeroAbility")){
+            if (action.getCommand().equals("useHeroAbility")) {
                 int row = action.getAffectedRow();
-                getCurrentPlayer().specialAttackHero(table.getCardsOnTable().get(row),row,output);
+                getCurrentPlayer().specialAttackHero(table.getCardsOnTable().get(row), row,
+                        output);
             }
             if (action.getCommand().equals("getFrozenCardsOnTable")) {
                 ArrayList<Minion> frozen = table.getFrozenCards();
 //                objectNode.put("command", "getFrozenCardsOnTable");
 //                objectNode.putPOJO("output", frozen);
 //                output.addPOJO(objectNode);
-                Comands getFrozenCardsOnTable = new Comands("getFrozenCardsOnTable", frozen);
+                Commands getFrozenCardsOnTable = new Commands("getFrozenCardsOnTable", frozen);
                 getFrozenCardsOnTable.easyCommand(output);
             }
-            if (action.getCommand().equals("getPlayerOneWins")){
+            if (action.getCommand().equals("getPlayerOneWins")) {
 //                objectNode.put("command", "getPlayerOneWins");
 //                objectNode.putPOJO("output", player1.getNumberWins());
 //                output.addPOJO(objectNode);
-                Comands getPlayerOneWins = new Comands("getPlayerOneWins", player1.getNumberWins());
+                Commands getPlayerOneWins = new Commands("getPlayerOneWins",
+                        player1.getNumberWins());
                 getPlayerOneWins.easyCommand(output);
             }
-            if (action.getCommand().equals("getPlayerTwoWins")){
+            if (action.getCommand().equals("getPlayerTwoWins")) {
 //                objectNode.put("command", "getPlayerTwoWins");
 //                objectNode.putPOJO("output", player2.getNumberWins());
 //                output.addPOJO(objectNode);
-                Comands getPlayerTwoWins = new Comands("getPlayerTwoWins", player2.getNumberWins());
+                Commands getPlayerTwoWins = new Commands("getPlayerTwoWins",
+                        player2.getNumberWins());
                 getPlayerTwoWins.easyCommand(output);
 
             }
-            if (action.getCommand().equals("getTotalGamesPlayed")){
+            if (action.getCommand().equals("getTotalGamesPlayed")) {
 //                objectNode.put("command", "getTotalGamesPlayed");
 //                objectNode.putPOJO("output", gamesPlayed);
 //                output.addPOJO(objectNode);
-                Comands getTotalGamesPlayed = new Comands("getTotalGamesPlayed", gamesPlayed);
+                Commands getTotalGamesPlayed = new Commands("getTotalGamesPlayed",
+                        gamesPlayed);
                 getTotalGamesPlayed.easyCommand(output);
             }
-
         }
     }
 
+    /**
+     * the method that resets the variables for a new round
+     */
     public void newRound() {
         player1.getCardInHand();
         player2.getCardInHand();
-        if (getNextMana() <= MAX_MANA)
+        if (getNextMana() <= maxMana) {
             setNextMana(getNextMana() + 1);
+        }
         player1.setMana(player1.getMana() + getNextMana());
         player2.setMana(player2.getMana() + getNextMana());
         table.unattackCards();
@@ -193,25 +221,42 @@ public class Game {
         player2.getHero().setHasAttacked(false);
     }
 
+    /**
+     * method that get the player by index
+     */
     public Player getPlayer(final int idx) {
-        if (idx == ONE)
+        if (idx == ONE) {
             return player1;
+        }
         return player2;
     }
 
-    public Player getCurrentPlayer(){
-        if(player1.getIsPlayerTurn())
+    /**
+     * method that return the current player
+     * @return the current player
+     */
+    public Player getCurrentPlayer() {
+        if (player1.getIsPlayerTurn()) {
             return player1;
+        }
         return player2;
     }
 
-    public Player getOpponent(){
-        if(player1.getIsPlayerTurn())
+    /**
+     * method that return the opponent
+     * @return opponent
+     */
+    public Player getOpponent() {
+        if (player1.getIsPlayerTurn()) {
             return player2;
+        }
         return player1;
     }
 
-    public void endTurn(){
+    /**
+     * methodd that end the turn for the current player
+     */
+    public void endTurn() {
         table.unfreezeCards(getCurrentPlayer().getFirstRow(), getCurrentPlayer().getSecondRow());
         Player opponent = getOpponent();
         getCurrentPlayer().setIsPlayerTurn(false);

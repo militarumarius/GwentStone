@@ -2,20 +2,29 @@ package cards;
 
 import fileio.CardInput;
 
-public class Ripper extends Minion{
-    public Ripper (CardInput card){
+public class Ripper extends Minion {
+
+    public Ripper(final CardInput card) {
         super(card);
     }
-    public Ripper (Minion minion) {
+
+    /**
+     * copy constructor
+     */
+    public Ripper(final Minion minion) {
         super(minion);
     }
 
+    /**
+     * method that make the special ability of the Ripper
+     */
     @Override
-    public void specialAbility(Minion enemy){
+    public void specialAbility(final Minion enemy) {
         int attack = enemy.getAttackDamage();
-        if(attack < 2)
+        if (attack < 2) {
             enemy.setAttackDamage(0);
-        else
-            enemy.setAttackDamage(attack - 2);
+            return;
+        }
+        enemy.setAttackDamage(attack - 2);
     }
 }

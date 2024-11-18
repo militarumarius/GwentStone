@@ -2,26 +2,27 @@ package game;
 
 import java.util.ArrayList;
 
-import cards.*;
+import cards.Minion;
+import cards.Disciple;
+import cards.Miraj;
+import cards.Ripper;
+import cards.CursedOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fileio.CardInput;
 
 
-public class Deck extends Object{
+public class Deck {
     @JsonIgnore
     private int numberCards;
-
     private ArrayList<Minion> cards;
 
-    public int getNumberCards() {
-        return numberCards;
-    }
-
+    /**
+     */
     public ArrayList<Minion> getCards() {
         return cards;
     }
 
-    public Deck(ArrayList<CardInput> deck) {
+    public Deck(final ArrayList<CardInput> deck) {
         this.cards = new ArrayList<>(deck.size());
         this.numberCards = deck.size();
         for (CardInput card : deck) {
@@ -44,7 +45,11 @@ public class Deck extends Object{
         }
     }
 
-    public Deck(Deck deck){
+    /**
+     * copy constructor for displaying the output
+     * @param deck the deck to be copied
+     */
+    public Deck(final Deck deck) {
         this.cards = new ArrayList<>(deck.numberCards);
         this.numberCards = deck.numberCards;
         for (Minion card : deck.cards) {

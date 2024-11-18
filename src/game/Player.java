@@ -1,8 +1,17 @@
 package game;
 
-import cards.*;
+
+import cards.Hero;
+import cards.KingMudface;
+import cards.LordRoyce;
+import cards.Minion;
+import cards.GeneralKocioraw;
+import cards.EmpressThorina;
+import cards.Disciple;
+import cards.Miraj;
+import cards.Ripper;
+import cards.CursedOne;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.CardInput;
@@ -10,73 +19,90 @@ import fileio.CardInput;
 import java.util.ArrayList;
 
 public class Player {
-    private Deck deck;
+    private final Deck deck;
     private Hero hero;
-    private int number;
-    private ArrayList<Minion> hand;
+    private final int number;
+    private final ArrayList<Minion> hand;
     private boolean isPlayerTurn;
     private int mana;
-    private int firstRow;
-    private int secondRow;
+    private final int firstRow;
+    private final int secondRow;
     private int numberWins;
 
+    /**
+     */
     public int getNumberWins() {
         return numberWins;
     }
 
-    public void setNumberWins(int numberWins) {
-        this.numberWins = numberWins;
-    }
-
+    /**
+     */
     public int getSecondRow() {
         return secondRow;
     }
 
-
+    /**
+     */
     public int getFirstRow() {
         return firstRow;
     }
 
-
-
+    /**
+     */
     public Hero getHero() {
         return hero;
     }
 
+    /**
+     */
     public ArrayList<Minion> getHand() {
         return hand;
     }
 
-
+    /**
+     */
     public int getMana() {
         return mana;
     }
 
-    public void setMana(int mana) {
+    /**
+     */
+    public void setMana(final int mana) {
         this.mana = mana;
     }
 
-    public void setHero(Hero hero) {
+    /**
+     */
+    public void setHero(final Hero hero) {
         this.hero = hero;
     }
 
+    /**
+     */
     public Deck getDeck() {
         return deck;
     }
 
+    /**
+     */
     public int getNumber() {
         return number;
     }
 
+    /**
+     */
     public boolean getIsPlayerTurn() {
         return isPlayerTurn;
     }
 
-    public void setIsPlayerTurn(boolean isPlayerTurn) {
+    /**
+     */
+    public void setIsPlayerTurn(final boolean isPlayerTurn) {
         this.isPlayerTurn = isPlayerTurn;
     }
 
-    public Player(Deck deckPlayer, CardInput hero, int number, int x, int y) {
+    public Player(final Deck deckPlayer, final CardInput hero,
+                  final int number, final int x, final int y) {
         this.deck = deckPlayer;
         this.number = number;
         this.hand = new ArrayList<>();
@@ -85,16 +111,30 @@ public class Player {
         this.secondRow = y;
         this.numberWins = 0;
         switch (hero.getName()) {
-            case "Lord Royce" -> this.hero = new LordRoyce(hero);
-            case "King Mudface" -> this.hero = new KingMudface(hero);
-            case "General Kocioraw" -> this.hero = new GeneralKocioraw(hero);
-            case "Empress Thorina" -> this.hero = new EmpressThorina(hero);
+            case "Lord Royce" -> {
+                this.hero = new LordRoyce(hero);
+            }
+            case "King Mudface" -> {
+                this.hero = new KingMudface(hero);
+            }
+            case "General Kocioraw" -> {
+                this.hero = new GeneralKocioraw(hero);
+            }
+            case "Empress Thorina" -> {
+                this.hero = new EmpressThorina(hero);
+            }
+            default -> {
+                this.hero = new Hero(hero);
+            }
         }
     }
 
+    /**
+     * copy player's hand to print object
+     */
     public ArrayList<Minion> getCopyHand() {
         ArrayList<Minion> copyHand = new ArrayList<>(this.getHand().size());
-        for(Minion card : this.getHand()){
+        for (Minion card : this.getHand()) {
             switch (card.getName()) {
                 case "The Ripper" -> {
                     Ripper ripper = new Ripper(card);
@@ -120,61 +160,97 @@ public class Player {
         }
         return copyHand;
     }
-    public void specialAttackHero(ArrayList<Minion> rowOnTable, int row, ArrayNode output){
-        String error = "";
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode objectNode = mapper.createObjectNode();
-        if(this.mana < this.hero.getMana()){
-            error = "Not enough mana to use hero's ability.";
-        } else if (this.hero.getIsHasAttacked()) {
-            error = "Hero has already attacked this turn.";
-        } else if(this.hero.getName().equals("Lord Royce") || this.hero.getName().equals("Empress Thorina")) {
-            if (row == this.firstRow || row == this.secondRow) {
-                error = "Selected row does not belong to the enemy.";
-            } else {
-                this.mana -= this.hero.getMana();
-                this.hero.setHasAttacked(true);
-                this.hero.specialHeroAbility(rowOnTable);
-                return;
-            }
-        }else{
-            if (row != this.firstRow && row != this.secondRow) {
-                error = "Selected row does not belong to the current player.";
-            } else {
-                this.mana -= this.hero.getMana();
-                this.hero.setHasAttacked(true);
-                this.hero.specialHeroAbility(rowOnTable);
-                return;
-            }
+
+    /**
+     * method for hero attack command
+     * @param rowOnTable the row that need to attack
+     * @param row the idx of the row
+     * @param output array node to display the objects
+     */
+    public void specialAttackHero(final ArrayList<Minion> rowOnTable, final int row,
+                                  final ArrayNode output) {
+        String error = errorHeroAbility(row);
+        if (error == null) {
+            mana -= hero.getMana();
+            hero.setHasAttacked(true);
+            hero.specialHeroAbility(rowOnTable);
+            return;
         }
-        objectNode.put("command", "useHeroAbility");
-        objectNode.put("affectedRow", row);
-        objectNode.put("error", error);
-        output.addPOJO(objectNode);
+//        ObjectMapper mapper = new ObjectMapper();
+//        ObjectNode objectNode = mapper.createObjectNode();
+//        objectNode.put("command", "useHeroAbility");
+//        objectNode.put("affectedRow", row);
+//        objectNode.put("error", error);
+//        output.addPOJO(objectNode);
+        Commands useHeroAbility = new Commands("useHeroAbility", row, error);
+        useHeroAbility.errorCommandHero(output);
     }
-    public void getCardInHand(){
+
+    /**
+     * method for getting  a card in hand from deck
+     */
+    public void getCardInHand() {
         if (!(deck.getCards().isEmpty())) {
             hand.add(deck.getCards().get(0));
             deck.getCards().remove(0);
         }
     }
 
-    public String errorPlaceCard(int handIdx, int firstRowSize, int SecondRowSize) {
-        if (hand.size() < handIdx + 1)
+    /**
+     * method that checks if the game is over
+     * @param opponent player's oopponent
+     * @param output array node to display the object
+     */
+    public void checkEndGame(final Player opponent, final ArrayNode output) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        if (opponent.getHero().getHealth() <= 0 && !hero.isStatusKilled()) {
+            hero.setStatusKilled(true);
+            numberWins++;
+            if (number == 1) {
+                objectNode.put("gameEnded", "Player one killed the enemy hero.");
+            } else {
+                objectNode.put("gameEnded", "Player two killed the enemy hero.");
+            }
+            output.addPOJO(objectNode);
+        }
+    }
+
+    /**
+     * method that checks if we have an error at place card command
+     * @param handIdx index of the card in hand
+     * @param firstRowSize first player row
+     * @param secondRowSize second player's row
+     * @return error
+     */
+    public String errorPlaceCard(final int handIdx, final int firstRowSize,
+                                 final int secondRowSize) {
+        if (hand.size() < handIdx + 1) {
             return null;
+        }
         if (mana < hand.get(handIdx).getMana()) {
             return "Not enough mana to place card on table.";
         }
-        if(hand.get(handIdx).isTankSpecial() &&  firstRowSize == 5) {
+        if (hand.get(handIdx).isTankSpecial() &&  firstRowSize == 5) {
             return "Cannot place card on table since row is full.";
         }
-        if (!hand.get(handIdx).isTankSpecial() &&  SecondRowSize == 5) {
+        if (!hand.get(handIdx).isTankSpecial() &&  secondRowSize == 5) {
             return  "Cannot place card on table since row is full.";
         }
         return null;
     }
-    public String errorAttackCard(Minion cardAttacker, Minion cardAttacked, Coordinates attacked, boolean checkOpponent) {
-        if (attacked.x == secondRow|| attacked.x == firstRow) {
+
+    /**
+     * method that checks if we have an error at Attack card command
+     * @param cardAttacker the card that attack
+     * @param cardAttacked the card that is attacked
+     * @param attacked the coordinates of attacked card
+     * @param checkOpponent the opponent tank check
+     * @return error obtained
+     */
+    public String errorAttackCard(final Minion cardAttacker, final Minion cardAttacked,
+                                  final Coordinates attacked, final boolean checkOpponent) {
+        if (attacked.getX() == secondRow || attacked.getX() == firstRow) {
             return "Attacked card does not belong to the enemy.";
         }
         if (cardAttacker.getIsHasAttacked()) {
@@ -189,4 +265,27 @@ public class Player {
         return null;
     }
 
+    /**
+     * method that checks if we have an error at use Hero Ability command
+     * @param row the row where the hero needs to do is special ability
+     * @return  error obtained
+     */
+    public String errorHeroAbility(final int row) {
+        if (mana < hero.getMana()) {
+            return "Not enough mana to use hero's ability.";
+        }
+        if (hero.getIsHasAttacked()) {
+            return "Hero has already attacked this turn.";
+        }
+        if (hero.getName().equals("Lord Royce") || hero.getName().equals("Empress Thorina")) {
+            if (row == firstRow || row == secondRow) {
+                return "Selected row does not belong to the enemy.";
+            }
+            return null;
+        }
+        if (row != firstRow && row != secondRow) {
+                return  "Selected row does not belong to the current player.";
+        }
+        return null;
+    }
 }

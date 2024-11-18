@@ -141,6 +141,13 @@
     "colors" : [ "Pink", "Purple" ],
     "name" : "The Cursed One",
     "attackDamage" : 0
+  }, {
+    "mana" : 1,
+    "health" : 2,
+    "description" : "Standard card: Trained by the best, nothing will catch him off-guard.",
+    "colors" : [ "Black", "White" ],
+    "name" : "Sentinel",
+    "attackDamage" : 5
   } ]
 }, {
   "command" : "useAttackHero",
@@ -191,6 +198,20 @@
     "description" : "Standard card: Thrown from the highest cliff, revenge will be his glory.",
     "colors" : [ "Pink", "Purple" ],
     "name" : "The Cursed One",
+    "attackDamage" : 0
+  }, {
+    "mana" : 1,
+    "health" : 2,
+    "description" : "Standard card: Trained by the best, nothing will catch him off-guard.",
+    "colors" : [ "Black", "White" ],
+    "name" : "Sentinel",
+    "attackDamage" : 5
+  }, {
+    "mana" : 1,
+    "health" : 2,
+    "description" : "Standard card: Everything is sacred to him, all is but a gift from the saints.",
+    "colors" : [ "Green", "Yellow", "Blue" ],
+    "name" : "Disciple",
     "attackDamage" : 0
   } ]
 }, {

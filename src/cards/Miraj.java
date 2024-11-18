@@ -3,15 +3,24 @@ package cards;
 import fileio.CardInput;
 
 public class Miraj extends Minion {
-    public Miraj(CardInput card) {
+
+    public Miraj(final CardInput card) {
         super(card);
     }
-    public Miraj(Minion minion) {
+
+    /**
+     * copy constructor
+     */
+    public Miraj(final Minion minion) {
         super(minion);
     }
+
+    /**
+     * method that make the special ability of the Miraj
+     */
     @Override
-    public void specialAbility(Minion enemy) {
-        int auxHealth = this.getHealth();;
+    public void specialAbility(final Minion enemy) {
+        int auxHealth = this.getHealth();
         this.setHealth(enemy.getHealth());
         enemy.setHealth(auxHealth);
     }

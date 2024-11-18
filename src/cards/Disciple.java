@@ -2,16 +2,24 @@ package cards;
 
 import fileio.CardInput;
 
-public class Disciple extends Minion{
-    public Disciple (CardInput card) {
+public class Disciple extends Minion {
+
+    public Disciple(final CardInput card) {
         super(card);
     }
 
-    public Disciple (Minion minion) {
+    /**
+     * copy constructor
+     */
+    public Disciple(final Minion minion) {
         super(minion);
     }
+
+    /**
+     * method that make the special ability of the Disciple
+     */
     @Override
-    public void specialAbility(Minion ally) {
+    public void specialAbility(final Minion ally) {
         ally.setHealth(ally.getHealth() + 2);
     }
 }
