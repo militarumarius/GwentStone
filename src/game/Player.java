@@ -16,24 +16,28 @@ public class Player {
     private ArrayList<Minion> hand;
     private boolean isPlayerTurn;
     private int mana;
-    private int x;
-    private int y;
+    private int firstRow;
+    private int secondRow;
+    private int numberWins;
 
-    public int getY() {
-        return y;
+    public int getNumberWins() {
+        return numberWins;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public void setNumberWins(int numberWins) {
+        this.numberWins = numberWins;
     }
 
-    public int getX() {
-        return x;
+    public int getSecondRow() {
+        return secondRow;
     }
 
-    public void setX(int x) {
-        this.x = x;
+
+    public int getFirstRow() {
+        return firstRow;
     }
+
+
 
     public Hero getHero() {
         return hero;
@@ -43,9 +47,6 @@ public class Player {
         return hand;
     }
 
-    public void setHand(ArrayList<Minion> hand) {
-        this.hand = hand;
-    }
 
     public int getMana() {
         return mana;
@@ -63,21 +64,8 @@ public class Player {
         return deck;
     }
 
-    public void setDeck(Deck deck) {
-        this.deck = deck;
-    }
-
     public int getNumber() {
         return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public void addCard(Minion card){
-        Minion minion = new Minion(card);
-
     }
 
     public boolean getIsPlayerTurn() {
@@ -93,16 +81,14 @@ public class Player {
         this.number = number;
         this.hand = new ArrayList<>();
         this.isPlayerTurn = false;
-        this.x = x;
-        this.y = y;
-        if(hero.getName().equals("Lord Royce")){
-            this.hero = new LordRoyce(hero);
-        } else if(hero.getName().equals("King Mudface") ){
-            this.hero = new KingMudface(hero);
-        } else if(hero.getName().equals("General Kocioraw")){
-            this.hero = new GeneralKocioraw(hero);
-        } else if(hero.getName().equals("Empress Thorina")){
-            this.hero = new EmpressThorina(hero);
+        this.firstRow = x;
+        this.secondRow = y;
+        this.numberWins = 0;
+        switch (hero.getName()) {
+            case "Lord Royce" -> this.hero = new LordRoyce(hero);
+            case "King Mudface" -> this.hero = new KingMudface(hero);
+            case "General Kocioraw" -> this.hero = new GeneralKocioraw(hero);
+            case "Empress Thorina" -> this.hero = new EmpressThorina(hero);
         }
     }
 
@@ -143,7 +129,7 @@ public class Player {
         } else if (this.hero.getIsHasAttacked()) {
             error = "Hero has already attacked this turn.";
         } else if(this.hero.getName().equals("Lord Royce") || this.hero.getName().equals("Empress Thorina")) {
-            if (row == this.x || row == this.y) {
+            if (row == this.firstRow || row == this.secondRow) {
                 error = "Selected row does not belong to the enemy.";
             } else {
                 this.mana -= this.hero.getMana();
@@ -152,7 +138,7 @@ public class Player {
                 return;
             }
         }else{
-            if (row != this.x && row != this.y) {
+            if (row != this.firstRow && row != this.secondRow) {
                 error = "Selected row does not belong to the current player.";
             } else {
                 this.mana -= this.hero.getMana();
@@ -165,10 +151,42 @@ public class Player {
         objectNode.put("affectedRow", row);
         objectNode.put("error", error);
         output.addPOJO(objectNode);
-
-
-
+    }
+    public void getCardInHand(){
+        if (!(deck.getCards().isEmpty())) {
+            hand.add(deck.getCards().get(0));
+            deck.getCards().remove(0);
+        }
     }
 
+    public String errorPlaceCard(int handIdx, int firstRowSize, int SecondRowSize) {
+        if (hand.size() < handIdx + 1)
+            return null;
+        if (mana < hand.get(handIdx).getMana()) {
+            return "Not enough mana to place card on table.";
+        }
+        if(hand.get(handIdx).isTankSpecial() &&  firstRowSize == 5) {
+            return "Cannot place card on table since row is full.";
+        }
+        if (!hand.get(handIdx).isTankSpecial() &&  SecondRowSize == 5) {
+            return  "Cannot place card on table since row is full.";
+        }
+        return null;
+    }
+    public String errorAttackCard(Minion cardAttacker, Minion cardAttacked, Coordinates attacked, boolean checkOpponent) {
+        if (attacked.x == secondRow|| attacked.x == firstRow) {
+            return "Attacked card does not belong to the enemy.";
+        }
+        if (cardAttacker.getIsHasAttacked()) {
+            return "Attacker card has already attacked this turn.";
+        }
+        if (cardAttacker.getIsFrozen()) {
+            return "Attacker card is frozen.";
+        }
+        if (!cardAttacked.isTankSpecial() && checkOpponent) {
+            return "Attacked card is not of type 'Tank'.";
+        }
+        return null;
+    }
 
 }

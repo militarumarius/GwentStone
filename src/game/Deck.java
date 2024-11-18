@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import fileio.CardInput;
 
 
-public class Deck {
+public class Deck extends Object{
     @JsonIgnore
     private int numberCards;
 

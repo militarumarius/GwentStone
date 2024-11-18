@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import fileio.ActionsInput;
 
 import java.util.ArrayList;
 
@@ -16,8 +17,6 @@ public class Table {
     private final int TWO = 2;
     @JsonIgnore
     private final int ROWS = 4;
-    @JsonIgnore
-    private final int COLUMNS = 5;
 
     public ArrayList<ArrayList<Minion>> getCardsOnTable() {
         return cardsOnTable;
@@ -34,12 +33,12 @@ public class Table {
     public void addCard(Minion minion, int playerIdx) {
 
         if (playerIdx == ONE) {
-            if (minion.getIsTank())
+            if (minion.isTankSpecial())
                 cardsOnTable.get(2).add(minion);
             else
                 cardsOnTable.get(3).add(minion);
         } else {
-            if (minion.getIsTank())
+            if (minion.isTankSpecial())
                 cardsOnTable.get(1).add(minion);
                 else
                 cardsOnTable.get(0).add(minion);
@@ -81,7 +80,7 @@ public class Table {
     }
     public boolean checkTank(int row) {
         for(Minion minion : cardsOnTable.get(row)){
-            if(minion.isTankSpecial())
+            if(minion.getIsTank())
                 return true;
         }
         return false;
@@ -100,18 +99,11 @@ public class Table {
             }
         }
     }
-    public void placeCard(Player player, int handIdx, ArrayNode output, int x, int y) {
-        if (player.getHand().size() < handIdx + 1)
-            return;
-
-        String error = "";
-        if (player.getMana() < player.getHand().get(handIdx).getMana()) {
-            error = "Not enough mana to place card on table.";
-        } else if (player.getHand().get(handIdx).getIsTank() && this.getCardsOnTable().get(x).size() == 5) {
-            error = "Cannot place card on table since row is full.";
-        } else if (!player.getHand().get(handIdx).getIsTank() && this.getCardsOnTable().get(y).size() == 5) {
-            error = "Cannot place card on table since row is full.";
-        } else {
+    public void placeCardOnTable(Player player, int handIdx, ArrayNode output, int x, int y) {
+        int firstRow = this.getCardsOnTable().get(x).size();
+        int secondRow = this.getCardsOnTable().get(y).size();
+        String error =  player.errorPlaceCard(handIdx, firstRow, secondRow);
+        if(error == null){
             this.addCard(player.getHand().get(handIdx), player.getNumber());
             player.setMana(player.getMana() - player.getHand().get(handIdx).getMana());
             player.getHand().remove(handIdx);
@@ -123,6 +115,8 @@ public class Table {
         objectNode.put("handIdx", handIdx);
         objectNode.put("error", error);
         output.addPOJO(objectNode);
+//        Comands getPlayerHero = new Comands(player, "getPlayerHero", copy);
+//        getPlayerHero.playerOutput(output);
     }
 
     public ArrayList<Minion> getFrozenCards() {
@@ -138,4 +132,115 @@ public class Table {
 
     }
 
+    public void useAbilityCard(Coordinates attacker, Coordinates attacked, Player opponent, ArrayNode output){
+        String error = "";
+        Minion cardAttacked = this.getCardsOnTable().get(attacked.x).get(attacked.y);
+        Minion cardAttacker = this.getCardsOnTable().get(attacker.x).get(attacker.y);
+        if (cardAttacker.getIsFrozen()) {
+            error = "Attacker card is frozen.";
+        } else if (cardAttacker.getIsHasAttacked()) {
+            error = "Attacker card has already attacked this turn.";
+        } else if (cardAttacker.getName().equals("Disciple")) {
+            if ((attacked.x / 2 != attacker.x /2)) {
+                error = "Attacked card does not belong to the current player.";
+            } else {
+                cardAttacker.setHasAttacked(true);
+                cardAttacker.specialAbility(cardAttacked);
+                if (cardAttacked.getHealth() <= 0)
+                    this.getCardsOnTable().get(attacked.x).remove(attacked.y);
+                return;
+            }
+        } else {
+            if (attacked.x / 2 == attacker.x / 2) {
+                error = "Attacked card does not belong to the enemy.";
+            } else if (!cardAttacked.getIsTank() && this.checkTank(opponent.getFirstRow())) {
+                error = "Attacked card is not of type 'Tank'.";
+            } else {
+                cardAttacker.setHasAttacked(true);
+                cardAttacker.specialAbility(cardAttacked);
+                if (cardAttacked.getHealth() <= 0)
+                    this.getCardsOnTable().get(attacked.x).remove(attacked.y);
+                return;
+            }
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", "cardUsesAbility");
+        objectNode.putPOJO("cardAttacker", attacker);
+        objectNode.putPOJO("cardAttacked", attacked);
+        objectNode.put("error", error);
+        output.addPOJO(objectNode);
+
+    }
+    public void getCardPosition(ActionsInput action, ArrayNode output) {
+        Coordinates cardPosition = new Coordinates(action.getX(), action.getY());
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", "getCardAtPosition");
+        objectNode.put("x", cardPosition.x);
+        objectNode.put("y", cardPosition.y);
+        if (cardPosition.y + 1 > cardsOnTable.get(cardPosition.x).size()) {
+            objectNode.put("output", "No card available at that position.");
+        } else {
+            Minion copy = new Minion(cardsOnTable.get(cardPosition.x).get(cardPosition.y));
+            objectNode.putPOJO("output", copy);
+        }
+        output.addPOJO(objectNode);
+
+    }
+
+    public void attackCard(Coordinates attacker, Coordinates attacked, Player current, Player opponent, ArrayNode output) {
+        Minion cardAttacked = this.getCardsOnTable().get(attacked.x).get(attacked.y);
+        Minion cardAttacker = this.getCardsOnTable().get(attacker.x).get(attacker.y);
+        String error = current.errorAttackCard(cardAttacker,cardAttacked,attacked,checkTank(opponent.getFirstRow()));
+        if(error == null){
+            cardAttacker.setHasAttacked(true);
+            if (cardAttacked.getHealth() <= cardAttacker.getAttackDamage()) {
+                this.getCardsOnTable().get(attacked.x).remove(attacked.y);
+            }
+            cardAttacked.setHealth(cardAttacked.getHealth() - cardAttacker.getAttackDamage());
+            return;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", "cardUsesAttack");
+        objectNode.putPOJO("cardAttacker", attacker);
+        objectNode.putPOJO("cardAttacked", attacked);
+        objectNode.put("error", error);
+        output.addPOJO(objectNode);
+    }
+
+    public void attackHero(Coordinates attacker, Player opponent, Player current,  ArrayNode output) {
+        String error = "";
+        Minion cardAttacker = cardsOnTable.get(attacker.x).get(attacker.y);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        if (cardAttacker.getIsFrozen()) {
+            error = "Attacker card is frozen.";
+        } else if (cardAttacker.getIsHasAttacked()) {
+            error = "Attacker card has already attacked this turn.";
+        } else if (this.checkTank(opponent.getFirstRow())) {
+            error = "Attacked card is not of type 'Tank'.";
+        } else {
+            Hero hero = opponent.getHero();
+            cardAttacker.setHasAttacked(true);
+            hero.setHealth(hero.getHealth() - cardAttacker.getAttackDamage());
+            if(opponent.getHero().getHealth() <= 0 && current.getNumber() == ONE && !hero.isStatusKilled()){
+                objectNode.put("gameEnded", "Player one killed the enemy hero.");
+                current.setNumberWins(current.getNumberWins() + 1);
+                hero.setStatusKilled(true);
+                output.addPOJO(objectNode);
+            } else if(opponent.getHero().getHealth() <= 0 && current.getNumber() == TWO && !hero.isStatusKilled()){
+                objectNode.put("gameEnded", "Player two killed the enemy hero.");
+                hero.setStatusKilled(true);
+                output.addPOJO(objectNode);
+                current.setNumberWins(current.getNumberWins() + 1);
+            }
+            return;
+        }
+        objectNode.put("command", "useAttackHero");
+        objectNode.putPOJO("cardAttacker", attacker);
+        objectNode.put("error", error);
+        output.addPOJO(objectNode);
+    }
 }

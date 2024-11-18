@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import fileio.CardInput;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class Card {
+public class Card extends Object {
 
     private int mana;
     private int health;

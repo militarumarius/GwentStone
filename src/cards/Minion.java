@@ -62,8 +62,8 @@ public class Minion extends Card{
         this.health = card.getHealth();
         this.attackDamage = card.getAttackDamage();
         this.isFrozen = false;
-        this.isTankSpecial = card.getName().equals("Warden") || card.getName().equals("Goliath");
-        this.isTank = card.getName().equals("Warden") || card.getName().equals("Goliath")
+        this.isTank = card.getName().equals("Warden") || card.getName().equals("Goliath");
+        this.isTankSpecial = card.getName().equals("Warden") || card.getName().equals("Goliath")
                 || card.getName().equals("The Ripper") || card.getName().equals("Miraj");
 
     }

@@ -70,10 +70,12 @@ public final class Main {
         Input inputData = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH + filePath1),
                 Input.class);
 
+        int gamesPlayed = 0;
         ArrayNode output = objectMapper.createArrayNode();
         for (GameInput game : inputData.getGames()) {
+            gamesPlayed++;
             Game newGame = new Game(game.getStartGame(), inputData.getPlayerOneDecks(),inputData.getPlayerTwoDecks());
-            newGame.startGame(game.getActions(), output);
+            newGame.startGame(game.getActions(), gamesPlayed, output);
         }
 
 
