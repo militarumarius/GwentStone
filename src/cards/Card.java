@@ -76,7 +76,6 @@ public class Card {
         this.description = card.getDescription();
         this.colors = card.getColors();
         this.name = card.getName();
-//        this.hasAttacked = false;
     }
 
     public Card (Card card) {

@@ -87,7 +87,7 @@
   "command" : "getCardsOnTable",
   "output" : [ [ {
     "mana" : 3,
-    "health" : 2,
+    "health" : 8,
     "description" : "Standard card: Everything is sacred to him, all is but a gift from the saints.",
     "colors" : [ "Green", "Yellow", "Blue" ],
     "name" : "Disciple",
@@ -108,14 +108,14 @@
     "attackDamage" : 0
   } ], [ {
     "mana" : 3,
-    "health" : 7,
+    "health" : 5,
     "description" : "Standard card: A warrior who is never afraid of battle, no matter the costs",
     "colors" : [ "Red", "Purple" ],
     "name" : "Goliath",
-    "attackDamage" : 1
+    "attackDamage" : 0
   }, {
     "mana" : 5,
-    "health" : 3,
+    "health" : 6,
     "description" : "Standard card: When he is near, close your eyes. They betray your mind.",
     "colors" : [ "Red", "Black" ],
     "name" : "Miraj",
@@ -143,18 +143,18 @@
     "attackDamage" : 4
   }, {
     "mana" : 5,
-    "health" : 4,
+    "health" : 11,
     "description" : "Standard card: When he is near, close your eyes. They betray your mind.",
     "colors" : [ "Yellow", "Orange", "Red" ],
     "name" : "Miraj",
     "attackDamage" : 5
   } ], [ {
     "mana" : 1,
-    "health" : 3,
+    "health" : 2,
     "description" : "Premium card: His presence is not known even by ghosts, success at all costs.",
     "colors" : [ "Black", "White" ],
     "name" : "Sentinel",
-    "attackDamage" : 2
+    "attackDamage" : 3
   } ] ]
 }, {
   "command" : "getCardsInHand",

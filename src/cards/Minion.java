@@ -11,7 +11,16 @@ public class Minion extends Card{
     private boolean isFrozen;
     @JsonIgnore
     private boolean isTank;
-
+    @JsonIgnore
+    private boolean isTankSpecial;
+    @JsonIgnore
+    public boolean isTankSpecial() {
+        return isTankSpecial;
+    }
+    @JsonIgnore
+    public void setTankSpecial(boolean tankSpecial) {
+        isTankSpecial = tankSpecial;
+    }
 
     public int getAttackDamage() {
         return attackDamage;
@@ -53,6 +62,7 @@ public class Minion extends Card{
         this.health = card.getHealth();
         this.attackDamage = card.getAttackDamage();
         this.isFrozen = false;
+        this.isTankSpecial = card.getName().equals("Warden") || card.getName().equals("Goliath");
         this.isTank = card.getName().equals("Warden") || card.getName().equals("Goliath")
                 || card.getName().equals("The Ripper") || card.getName().equals("Miraj");
 
@@ -64,6 +74,7 @@ public class Minion extends Card{
         this.attackDamage = minion.getAttackDamage();
         this.isFrozen = minion.getIsFrozen();
         this.isTank = minion.getIsTank();
+        this.isTankSpecial = minion.isTankSpecial();
     }
 
 }

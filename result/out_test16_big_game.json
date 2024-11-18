@@ -71,17 +71,6 @@
   "command" : "getPlayerTurn",
   "output" : 2
 }, {
-  "command" : "cardUsesAttack",
-  "cardAttacker" : {
-    "x" : 2,
-    "y" : 0
-  },
-  "cardAttacked" : {
-    "x" : 0,
-    "y" : 2
-  },
-  "error" : "Attacked card is not of type 'Tank'."
-}, {
   "command" : "getPlayerTurn",
   "output" : 1
 }, {
@@ -105,17 +94,6 @@
   "playerIdx" : 2,
   "output" : 7
 }, {
-  "command" : "cardUsesAttack",
-  "cardAttacker" : {
-    "x" : 2,
-    "y" : 3
-  },
-  "cardAttacked" : {
-    "x" : 0,
-    "y" : 1
-  },
-  "error" : "Attacked card is not of type 'Tank'."
-}, {
   "command" : "getCardsOnTable",
   "output" : [ [ {
     "mana" : 2,
@@ -124,20 +102,6 @@
     "colors" : [ "Red", "Blue", "Pink" ],
     "name" : "Berserker",
     "attackDamage" : 2
-  }, {
-    "mana" : 1,
-    "health" : 2,
-    "description" : "Standard card: Trained by the best, nothing will catch him off-guard.",
-    "colors" : [ "Black", "Grey", "Blue" ],
-    "name" : "Sentinel",
-    "attackDamage" : 2
-  }, {
-    "mana" : 2,
-    "health" : 4,
-    "description" : "Premium card: The will of Gods has been spoken, obey and you shall be saved...or not.",
-    "colors" : [ "Green", "Yellow", "Blue" ],
-    "name" : "Disciple",
-    "attackDamage" : 0
   } ], [ {
     "mana" : 3,
     "health" : 4,
@@ -158,7 +122,7 @@
     "description" : "Premium card: You shall not pass, you shall not prevail, you shall perish.",
     "colors" : [ "Brown", "Blue" ],
     "name" : "Warden",
-    "attackDamage" : 2
+    "attackDamage" : 0
   }, {
     "mana" : 4,
     "health" : 4,

@@ -83,7 +83,7 @@ public class Table {
     }
     public boolean checkTank(int row) {
         for(Minion minion : cardsOnTable.get(row)){
-            if(minion.getIsTank())
+            if(minion.isTankSpecial())
                 return true;
         }
         return false;

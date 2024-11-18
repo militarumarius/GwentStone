@@ -11,7 +11,7 @@ public class Miraj extends Minion {
     }
     @Override
     public void specialAbility(Minion enemy) {
-        int auxHealth = enemy.getHealth();;
+        int auxHealth = this.getHealth();;
         this.setHealth(enemy.getHealth());
         enemy.setHealth(auxHealth);
     }

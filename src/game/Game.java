@@ -38,7 +38,7 @@ public class Game {
         int deckIndexPlayerTwo = input.getPlayerTwoDeckIdx();
         Deck deckPlayerTwo = new Deck(deckPlayer2.getDecks().get(deckIndexPlayerTwo));
         this.player1 = new Player(deckPlayerOne, input.getPlayerOneHero(), ONE, 2, 3);
-        this.player2 = new Player(deckPlayerTwo, input.getPlayerTwoHero(), TWO,0,1);
+        this.player2 = new Player(deckPlayerTwo, input.getPlayerTwoHero(), TWO,1,0);
         this.nextMana = 0;
         this.seed = input.getShuffleSeed();
         this.table = new Table();
@@ -146,16 +146,6 @@ public class Game {
                 Coordinates attacker = new Coordinates(action.getCardAttacker().getX(), action.getCardAttacker().getY());
                 Coordinates attacked = new Coordinates(action.getCardAttacked().getX(), action.getCardAttacked().getY());
                 if ((attacked.y + 1 <= table.getCardsOnTable().get(attacked.x).size())) {
-//                    int x1 = 2;
-//                    if (player2.getIsPlayerTurn())
-//                        x1 = 0;
-//                    if (attacked.x == x1 || attacked.x == x1 + 1) {
-//                        objectNode.put("command", "cardUsesAttack");
-//                        objectNode.putPOJO("cardAttacker", attacker);
-//                        objectNode.putPOJO("cardAttacked", attacked);
-//                        objectNode.put("error", "Attacked card does not belong to the enemy.");
-//                        output.addPOJO(objectNode);
-//                    } else
                         this.useAbilityCard(attacker, attacked, output);
                 }
 
@@ -170,10 +160,12 @@ public class Game {
         objectNode.put("command", "getCardAtPosition");
         objectNode.put("x", cardPosition.x);
         objectNode.put("y", cardPosition.y);
+
         if (cardPosition.y + 1 > table.getCardsOnTable().get(cardPosition.x).size()) {
             objectNode.put("output", "No card available at that position.");
         } else {
-            objectNode.putPOJO("output", table.getCardsOnTable().get(cardPosition.x).get(cardPosition.y));
+            Minion copy = new Minion(table.getCardsOnTable().get(cardPosition.x).get(cardPosition.y));
+            objectNode.putPOJO("output", copy);
         }
         output.addPOJO(objectNode);
 
@@ -188,8 +180,7 @@ public void attackCard(Coordinates attacker, Coordinates attacked, ArrayNode out
         error = "Attacker card has already attacked this turn.";
     } else if (cardAttacker.getIsFrozen()) {
         error = "Attacker card is frozen.";
-    } else if (!cardAttacked.getIsTank() && (player1.getIsPlayerTurn() && (table.checkTank(2))
-            || (player2.getIsPlayerTurn() && table.checkTank(1)))) {
+    } else if (!cardAttacked.isTankSpecial() && table.checkTank(getOpponent().getX())) {
         error = "Attacked card is not of type 'Tank'.";
     } else {
         cardAttacker.setHasAttacked(true);
@@ -216,24 +207,36 @@ public void useAbilityCard(Coordinates attacker, Coordinates attacked, ArrayNode
         error = "Attacker card is frozen.";
     } else if (cardAttacker.getIsHasAttacked()) {
         error = "Attacker card has already attacked this turn.";
-    } else if (!cardAttacked.getIsTank() && (player1.getIsPlayerTurn() && (table.checkTank(2))
-            || (player2.getIsPlayerTurn() && table.checkTank(1)))) {
-        error = "Attacked card is not of type 'Tank'.";
+    } else if (cardAttacker.getName().equals("Disciple")) {
+        if ((attacked.x / 2 != attacker.x /2)) {
+            error = "Attacked card does not belong to the current player.";
+        } else {
+            cardAttacker.setHasAttacked(true);
+            cardAttacker.specialAbility(cardAttacked);
+            if (cardAttacked.getHealth() <= 0)
+                table.getCardsOnTable().get(attacked.x).remove(attacked.y);
+            return;
+        }
     } else {
-        cardAttacker.setHasAttacked(true);
-        if (cardAttacked.getHealth() <= cardAttacker.getAttackDamage()) {
-            table.getCardsOnTable().get(attacked.x).remove(attacked.y);
-        } else
-            cardAttacked.setHealth(cardAttacked.getHealth() - cardAttacker.getAttackDamage());
-        return;
+        if (attacked.x / 2 == attacker.x / 2) {
+            error = "Attacked card does not belong to the enemy.";
+        } else if (!cardAttacked.isTankSpecial() && table.checkTank(getOpponent().getX())) {
+            error = "Attacked card is not of type 'Tank'.";
+        } else {
+            cardAttacker.setHasAttacked(true);
+            cardAttacker.specialAbility(cardAttacked);
+            if (cardAttacked.getHealth() <= 0)
+                table.getCardsOnTable().get(attacked.x).remove(attacked.y);
+            return;
+        }
     }
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode objectNode = mapper.createObjectNode();
-    objectNode.put("command", "cardUsesAttack");
-    objectNode.putPOJO("cardAttacker", attacker);
-    objectNode.putPOJO("cardAttacked", attacked);
-    objectNode.put("error", error);
-    output.addPOJO(objectNode);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", "cardUsesAbility");
+        objectNode.putPOJO("cardAttacker", attacker);
+        objectNode.putPOJO("cardAttacked", attacked);
+        objectNode.put("error", error);
+        output.addPOJO(objectNode);
 
 }
 
@@ -264,5 +267,9 @@ public Player getCurrentPlayer(){
             return player1;
         return player2;
 }
-
+    public Player getOpponent(){
+        if(player1.getIsPlayerTurn())
+            return player2;
+        return player1;
+    }
 }
