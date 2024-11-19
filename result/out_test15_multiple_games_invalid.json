@@ -141,13 +141,6 @@
     "colors" : [ "Pink", "Purple" ],
     "name" : "The Cursed One",
     "attackDamage" : 0
-  }, {
-    "mana" : 1,
-    "health" : 2,
-    "description" : "Standard card: Trained by the best, nothing will catch him off-guard.",
-    "colors" : [ "Black", "White" ],
-    "name" : "Sentinel",
-    "attackDamage" : 5
   } ]
 }, {
   "command" : "useAttackHero",
@@ -185,35 +178,7 @@
   }
 }, {
   "command" : "getFrozenCardsOnTable",
-  "output" : [ {
-    "mana" : 1,
-    "health" : 3,
-    "description" : "Premium card: His presence is not known even by ghosts, success at all costs.",
-    "colors" : [ "Black", "White" ],
-    "name" : "Sentinel",
-    "attackDamage" : 6
-  }, {
-    "mana" : 1,
-    "health" : 3,
-    "description" : "Standard card: Thrown from the highest cliff, revenge will be his glory.",
-    "colors" : [ "Pink", "Purple" ],
-    "name" : "The Cursed One",
-    "attackDamage" : 0
-  }, {
-    "mana" : 1,
-    "health" : 2,
-    "description" : "Standard card: Trained by the best, nothing will catch him off-guard.",
-    "colors" : [ "Black", "White" ],
-    "name" : "Sentinel",
-    "attackDamage" : 5
-  }, {
-    "mana" : 1,
-    "health" : 2,
-    "description" : "Standard card: Everything is sacred to him, all is but a gift from the saints.",
-    "colors" : [ "Green", "Yellow", "Blue" ],
-    "name" : "Disciple",
-    "attackDamage" : 0
-  } ]
+  "output" : [ ]
 }, {
   "command" : "useHeroAbility",
   "affectedRow" : 2,
@@ -618,14 +583,14 @@
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 1,
-  "output" : 50
+  "output" : 49
 }, {
   "command" : "getFrozenCardsOnTable",
   "output" : [ ]
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 2,
-  "output" : 58
+  "output" : 56
 }, {
   "command" : "getPlayerTurn",
   "output" : 2
@@ -644,7 +609,7 @@
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 1,
-  "output" : 61
+  "output" : 59
 }, {
   "command" : "getFrozenCardsOnTable",
   "output" : [ ]
@@ -674,7 +639,7 @@
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 2,
-  "output" : 65
+  "output" : 62
 }, {
   "command" : "useAttackHero",
   "cardAttacker" : {
@@ -700,7 +665,7 @@
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 2,
-  "output" : 76
+  "output" : 72
 }, {
   "command" : "getFrozenCardsOnTable",
   "output" : [ ]
@@ -710,7 +675,7 @@
 }, {
   "command" : "getPlayerMana",
   "playerIdx" : 1,
-  "output" : 80
+  "output" : 76
 }, {
   "command" : "getPlayerTurn",
   "output" : 2
@@ -843,5 +808,5 @@
   "output" : 1
 }, {
   "command" : "getPlayerOneWins",
-  "output" : 0
+  "output" : 1
 } ]

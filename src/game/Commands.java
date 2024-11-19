@@ -8,6 +8,7 @@ public class Commands {
     private int playerIdx;
     private Object object;
     private Object objectTwo;
+    private Object objectThree;
     private String principalComand;
     private String comandTwo;
     private String comand;
@@ -49,6 +50,15 @@ public class Commands {
         this.error = error;
     }
 
+    public Commands(final String principalComand, final String comand, final String comandTwo,
+                    final Object object, final Object objectTwo, final Object objectThree) {
+        this.comandTwo = comandTwo;
+        this.comand = comand;
+        this.principalComand = principalComand;
+        this.object = object;
+        this.objectTwo = objectTwo;
+        this.objectThree = objectThree;
+    }
     /**
      * method that make an JSON object for getPlayerIdx command
      * @param output array node to display the object
@@ -124,6 +134,32 @@ public class Commands {
         objectNode.putPOJO(comand, object);
         objectNode.putPOJO(comandTwo, objectTwo);
         objectNode.put("error", error);
+        output.addPOJO(objectNode);
+    }
+
+    /**
+     * method that make an JSON object for place card command error
+     */
+    public void errorPlaceCardCommand(final ArrayNode output) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", principalComand);
+        objectNode.putPOJO(comand, object);
+        objectNode.putPOJO(comandTwo, objectTwo);
+        objectNode.put("output", error);
+        output.addPOJO(objectNode);
+    }
+
+    /**
+     * method that make an JSON object for place card command
+     */
+    public void placeCardCommand(final ArrayNode output) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("command", principalComand);
+        objectNode.putPOJO(comand, object);
+        objectNode.putPOJO(comandTwo, objectTwo);
+        objectNode.putPOJO("output", objectThree);
         output.addPOJO(objectNode);
     }
 }

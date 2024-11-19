@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import checker.CheckerConstants;
 import fileio.GameInput;
 import fileio.Input;
+import game.Leaderboard;
 import game.Game;
 
 import java.io.File;
@@ -69,35 +70,14 @@ public final class Main {
         Input inputData = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH + filePath1),
                 Input.class);
 
-        int gamesPlayed = 0;
         ArrayNode output = objectMapper.createArrayNode();
+        Leaderboard leaderboard = new Leaderboard();
         for (GameInput game : inputData.getGames()) {
-            gamesPlayed++;
+            leaderboard.setNumberGames(leaderboard.getNumberGames() + 1);
             Game newGame = new Game(game.getStartGame(), inputData.getPlayerOneDecks(),
                     inputData.getPlayerTwoDecks());
-            newGame.startGame(game.getActions(), gamesPlayed, output);
+            newGame.playingGame(game.getActions(), leaderboard, output);
         }
-
-
-        /*
-         * TODO Implement your function here
-         *
-         * How to add output to the output array?
-         * There are multiple ways to do this, here is one example:
-         *
-         *ObjectMapper mapper = new ObjectMapper();
-         *
-         * ObjectNode objectNode = mapper.createObjectNode();
-         * objectNode.put("field_name", "field_value");
-         *
-         * ArrayNode arrayNode = mapper.createArrayNode();
-         * arrayNode.add(objectNode);
-         *
-         * output.add(arrayNode);
-         * output.add(objectNode);
-         *
-         */
-
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), output);
     }

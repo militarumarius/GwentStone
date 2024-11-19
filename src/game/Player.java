@@ -27,13 +27,7 @@ public class Player {
     private int mana;
     private final int firstRow;
     private final int secondRow;
-    private int numberWins;
-
-    /**
-     */
-    public int getNumberWins() {
-        return numberWins;
-    }
+    private static final int MAX_CARDS_ROW = 5;
 
     /**
      */
@@ -102,14 +96,13 @@ public class Player {
     }
 
     public Player(final Deck deckPlayer, final CardInput hero,
-                  final int number, final int x, final int y) {
+                   final int number, final int x, final int y) {
         this.deck = deckPlayer;
         this.number = number;
         this.hand = new ArrayList<>();
         this.isPlayerTurn = false;
         this.firstRow = x;
         this.secondRow = y;
-        this.numberWins = 0;
         switch (hero.getName()) {
             case "Lord Royce" -> {
                 this.hero = new LordRoyce(hero);
@@ -176,12 +169,6 @@ public class Player {
             hero.specialHeroAbility(rowOnTable);
             return;
         }
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode objectNode = mapper.createObjectNode();
-//        objectNode.put("command", "useHeroAbility");
-//        objectNode.put("affectedRow", row);
-//        objectNode.put("error", error);
-//        output.addPOJO(objectNode);
         Commands useHeroAbility = new Commands("useHeroAbility", row, error);
         useHeroAbility.errorCommandHero(output);
     }
@@ -204,9 +191,8 @@ public class Player {
     public void checkEndGame(final Player opponent, final ArrayNode output) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        if (opponent.getHero().getHealth() <= 0 && !hero.isStatusKilled()) {
-            hero.setStatusKilled(true);
-            numberWins++;
+        if (opponent.getHero().getHealth() <= 0) {
+            opponent.getHero().setStatusKilled(true);
             if (number == 1) {
                 objectNode.put("gameEnded", "Player one killed the enemy hero.");
             } else {
@@ -231,10 +217,10 @@ public class Player {
         if (mana < hand.get(handIdx).getMana()) {
             return "Not enough mana to place card on table.";
         }
-        if (hand.get(handIdx).isTankSpecial() &&  firstRowSize == 5) {
+        if (hand.get(handIdx).isTankSpecial() &&  firstRowSize == MAX_CARDS_ROW) {
             return "Cannot place card on table since row is full.";
         }
-        if (!hand.get(handIdx).isTankSpecial() &&  secondRowSize == 5) {
+        if (!hand.get(handIdx).isTankSpecial() &&  secondRowSize == MAX_CARDS_ROW) {
             return  "Cannot place card on table since row is full.";
         }
         return null;

@@ -59,7 +59,5 @@ public class Hero extends Card {
     public void specialHeroAbility(final ArrayList<Minion> enemy) {
 
     }
-
-
-    }
+}
 

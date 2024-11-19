@@ -7,21 +7,14 @@ import cards.Miraj;
 import cards.Ripper;
 import cards.CursedOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import fileio.ActionsInput;
 
 import java.util.ArrayList;
 
 public class Table {
-    private ArrayList<ArrayList<Minion>> cardsOnTable;
+    private final ArrayList<ArrayList<Minion>> cardsOnTable;
     @JsonIgnore
-    private final int ONE = 1;
-    @JsonIgnore
-    private final int TWO = 2;
-    @JsonIgnore
-    private final int ROWS = 4;
+    private static final int ROWS = 4;
 
     /**
      */
@@ -108,7 +101,7 @@ public class Table {
     }
 
     /**
-     * method that set the hasAttacked variable of a card to fals
+     * method that set the hasAttacked variable of a card to false
      * method needed for a new round
      */
     public void unattackCards() {
@@ -125,11 +118,13 @@ public class Table {
      * @param y coordinate y
      */
     public void unfreezeCards(final int x, final int y) {
-        for (int i = x; i <= y; i++) {
-            for (Minion minion : cardsOnTable.get(i)) {
-                minion.setIsFrozen(false);
-            }
+        for (Minion minion : cardsOnTable.get(x)) {
+            minion.setIsFrozen(false);
         }
+        for (Minion minion : cardsOnTable.get(y)) {
+            minion.setIsFrozen(false);
+        }
+
     }
 
     /**
@@ -151,12 +146,6 @@ public class Table {
             player.getHand().remove(handIdx);
             return;
         }
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode objectNode = mapper.createObjectNode();
-//        objectNode.put("command", "placeCard");
-//        objectNode.put("handIdx", handIdx);
-//        objectNode.put("error", error);
-//        output.addPOJO(objectNode);
         Commands getPlayerHero = new Commands("placeCard", handIdx, error);
         getPlayerHero.errorPlaceCard(output);
     }
@@ -168,13 +157,13 @@ public class Table {
     public ArrayList<Minion> getFrozenCards() {
         ArrayList<Minion> frozen = new ArrayList<Minion>();
         for (int i = 0; i < ROWS; i++) {
-            ArrayList<Minion> rand = getCopyTableRows(getCardsOnTable().get(i));
-            if (!rand.isEmpty() && rand.get(0).getIsFrozen()) {
-                frozen.addAll(rand);
+            for (Minion minion : getCardsOnTable().get(i)) {
+                if (minion.getIsFrozen()) {
+                    frozen.add(minion);
+                }
             }
         }
         return frozen;
-
     }
 
     /**
@@ -198,13 +187,6 @@ public class Table {
             }
             return;
         }
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode objectNode = mapper.createObjectNode();
-//        objectNode.put("command", "cardUsesAbility");
-//        objectNode.putPOJO("cardAttacker", attacker);
-//        objectNode.putPOJO("cardAttacked", attacked);
-//        objectNode.put("error", error);
-//        output.addPOJO(objectNode);
         Commands cardUsesAbility = new Commands("cardUsesAbility", "cardAttacker",
                 "cardAttacked", attacker, attacked, error);
         cardUsesAbility.errorUseAbility(output);
@@ -212,27 +194,24 @@ public class Table {
 
     /**
      * method that get a card at a given position
-     * @param action the actions input
      */
-    public void getCardPosition(final ActionsInput action, final ArrayNode output) {
-        Coordinates cardPosition = new Coordinates(action.getX(), action.getY());
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("command", "getCardAtPosition");
-        objectNode.put("x", cardPosition.getX());
-        objectNode.put("y", cardPosition.getY());
+    public void getCardPosition(final Coordinates cardPosition, final ArrayNode output) {
         if (cardPosition.getY() + 1 > cardsOnTable.get(cardPosition.getX()).size()) {
-            objectNode.put("output", "No card available at that position.");
-        } else {
-            Minion copy = new Minion(cardsOnTable.get(cardPosition.getX()).
-                    get(cardPosition.getY()));
-            objectNode.putPOJO("output", copy);
+            String error = "No card available at that position.";
+            Commands getCardAtPosition = new Commands("getCardAtPosition", "x",
+                    "y", cardPosition.getX(), cardPosition.getY(), error);
+            getCardAtPosition.errorPlaceCardCommand(output);
+            return;
         }
-        output.addPOJO(objectNode);
+        Minion copy = new Minion(cardsOnTable.get(cardPosition.getX()).
+                    get(cardPosition.getY()));
+        Commands getCardAtPosition = new Commands("getCardAtPosition", "x",
+                    "y", cardPosition.getX(), cardPosition.getY(), copy);
+        getCardAtPosition.placeCardCommand(output);
     }
 
     /**
-     * methot that attack a card
+     * method that attack a card
      * @param attacker the coordinates of the attacker
      * @param attacked the coordinates of the attacked
      * @param current the current player
@@ -255,20 +234,13 @@ public class Table {
                     getAttackDamage());
             return;
         }
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode objectNode = mapper.createObjectNode();
-//        objectNode.put("command", "cardUsesAttack");
-//        objectNode.putPOJO("cardAttacker", attacker);
-//        objectNode.putPOJO("cardAttacked", attacked);
-//        objectNode.put("error", error);
-//        output.addPOJO(objectNode);
         Commands cardUsesAttack = new Commands("cardUsesAttack", "cardAttacker",
                 "cardAttacked", attacker, attacked, error);
         cardUsesAttack.errorUseAbility(output);
     }
 
     /**
-     * methot that attack a hero
+     * method that attack a hero
      * @param attacker the coordinates of the attacker
      * @param opponent the opponent
      * @param current the current player
@@ -284,12 +256,6 @@ public class Table {
             current.checkEndGame(opponent, output);
             return;
         }
-//        ObjectMapper mapper = new ObjectMapper();
-//        ObjectNode objectNode = mapper.createObjectNode();
-//        objectNode.put("command", "useAttackHero");
-//        objectNode.putPOJO("cardAttacker", attacker);
-//        objectNode.put("error", error);
-//        output.addPOJO(objectNode);'
         Commands useAttackHero = new Commands("useAttackHero", "cardAttacker",
                 attacker, error);
         useAttackHero.errorAttackHero(output);
