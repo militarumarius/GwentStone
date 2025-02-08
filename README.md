@@ -1,42 +1,37 @@
+# Tema POO  - GwentStone 
+## Nume : Militaru Ionut-Marius 323CAb
+
+### Project Description 
+* The main goal of this project was to implement 
+a two-player game, incorporating various concepts from Hearthstone and Gwent.
 
 
-# Tema POO  - GwentStone
+## Implemented Classes
+* The functionalities for card types were implemented using the Cards class, 
+which was extended by the Minion and Hero classes. For special cards, I created 
+separate classes for each card type to allow adding new special cards at any time 
+without modifying the base Hero and Minion classes.
+* The Deck class holds a player’s deck, represented as an array of cards.
+* The Player class contains the necessary information for a player and various 
+methods that a player can perform (e.g., placing a card on the table).
+* The Table class contains an array of arrays of cards representing 
+the game table and various methods necessary for gameplay.
+* The Game class is specific to a game, and the gameplay takes place in the 
+playingGame method.
+* The Commands class is used to output results in JSON format.
+* The Leaderboard class keeps track of each player’s score.
 
-<div align="center"><img src="https://tenor.com/view/witcher3-gif-9340436.gif" width="500px"></div>
+## Gameplay description
+* Each player is assigned a set of decks from which they choose one.
+Cards come in different types, and each player has a hero representing them.
+* The game is played in rounds, during which players can take multiple actions.
+* The game ends when the opponent’s hero dies.
 
-#### Assignment Link: [https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/tema](https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/tema)
-
-
-## Skel Structure
-
-* src/
-  * checker/ - checker files
-  * fileio/ - contains classes used to read data from the json files
-  * main/
-      * Main - the Main class runs the checker on your implementation. Add the entry point to your implementation in it. Run Main to test your implementation from the IDE or from command line.
-      * Test - run the main method from Test class with the name of the input file from the command line and the result will be written
-        to the out.txt file. Thus, you can compare this result with ref.
-* input/ - contains the tests in JSON format
-* ref/ - contains all reference output for the tests in JSON format
-
-## Tests
-
-1. test01_game_start - 4p
-2. test02_place_card - 5p
-3. test03_place_card_invalid - 5p
-4. test04_attack_card - 5p
-5. test05_attack_card_invalid - 5p
-6. test06_use_card_ability - 5p
-7. test07_use_card_ability_invalid - 5p
-8. test08_attack_hero - 5p
-9. test09_attack_hero_invalid - 5p
-10. test10_use_hero_ability_1 - 4p
-11. test11_use_hero_ability_2 - 4p
-12. test12_use_hero_ability_invalid_1 - 4p
-13. test13_use_hero_ability_invalid_2 - 4p
-14. test14_multiple_games_valid - 5p
-15. test15_multiple_games_invalid - 5p
-16. test16_big_game - 10p
-
-
-<div align="center"><img src="https://tenor.com/view/homework-time-gif-24854817.gif" width="500px"></div>
+## Game Implementation
+* For commands where cards need to attack or use different abilities, 
+the action is first checked to see if it is valid and then the command is executed. 
+* For displaying output, I create new objects specifically for the output 
+representation. This is necessary because existing objects are modified during the 
+game, and the output always includes a reference to the object state at that specific moment.
+* To maintain the leaderboard, I created a single instance of the Leaderboard class 
+in the main method, ensuring a centralized way to track each player's performance.
