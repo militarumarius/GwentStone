@@ -1,4 +1,4 @@
-# Tema POO  - GwentStone 
+# GwentStone 
 ## Nume : Militaru Ionut-Marius 323CAb
 
 ### Project Description 
